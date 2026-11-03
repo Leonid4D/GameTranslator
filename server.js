@@ -19,16 +19,7 @@ const PORT = process.env.PORT || 3000;
 // 2. Настройка CORS
 // ВАЖНО: Замените 'https://your-frontend.github.io' на реальный URL вашего GitHub Pages
 const allowedOrigins = ['https://leonid4d.github.io/GameTranslator/'];
-app.use(cors({
-    origin: function (origin, callback) {
-        // Разрешаем запросы без origin (например, от Postman) и с вашего домена
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    }
-}));
+app.use(cors());
 
 // Middleware для парсинга JSON-тел запросов
 app.use(express.json());
