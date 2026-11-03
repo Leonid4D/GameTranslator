@@ -2136,7 +2136,7 @@ async function searchTerm(forceRefresh = false) {
   searchBtn.textContent = translations[uiLang].searching_btn;
 
   try {
-    const response = await fetch('http://localhost:3000/api/translate', {
+    const response = await fetch('https://nissan-ceo-janet-ministry.trycloudflare.com/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
