@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>О проекте — GameTranslator</title>
+<style>
+  :root {
+    --bg: #0d1117; --bg-alt: #161b22; --card: #1c2128;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --accent-2: #7ee787;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .logo {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-right: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .dot { color: var(--accent); }
+  .logo img {
+    height: 34px;
+    width: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+  .logo .year-badge {
+    font-size: 0.7rem; color: var(--muted);
+    font-weight: 400; margin-left: 6px;
+  }
+  .lang-switcher select {
+    background: var(--bg-alt); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 0.85rem;
+    cursor: pointer; outline: none; font-family: inherit;
+    transition: border-color .2s;
+  }
+  .lang-switcher select:hover,
+  .lang-switcher select:focus { border-color: var(--accent); }
+  .back-btn {
+    padding: 8px 16px; background: var(--bg-alt);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-size: 0.88rem;
+    transition: all .2s; white-space: nowrap;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+
+  main { max-width: 780px; margin: 0 auto; padding: 60px 24px 80px; }
+
+  .hero-about {
+    text-align: center;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .hero-about h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    background: linear-gradient(120deg, #58a6ff, #7ee787);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero-about p {
+    color: var(--muted); font-size: 1.05rem;
+    max-width: 600px; margin: 0 auto;
+  }
+
+  article h2 {
+    font-size: 1.35rem; color: var(--accent-2);
+    margin: 40px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  article h3 {
+    font-size: 1rem; color: var(--accent);
+    margin: 22px 0 8px;
+  }
+  article p { margin-bottom: 12px; color: var(--text); }
+  article ul, article ol { padding-left: 1.4em; margin-bottom: 14px; }
+  article li { margin-bottom: 6px; color: var(--muted); }
+  article li strong { color: var(--text); }
+
+  .pipeline {
+    display: flex; flex-direction: column; gap: 12px;
+    margin: 20px 0;
+  }
+  .pipeline-step {
+    display: flex; gap: 16px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .pipeline-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent); color: #0d1117;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem;
+  }
+  .pipeline-text { flex: 1; }
+  .pipeline-text strong { display: block; margin-bottom: 4px; }
+  .pipeline-text p { font-size: 0.9rem; color: var(--muted); margin: 0; }
+
+  .callout {
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent-2);
+    background: rgba(126, 231, 135, 0.06);
+    border-radius: 0 10px 10px 0;
+    margin: 18px 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+  .callout strong { color: var(--accent-2); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 560px) {
+    .nav { flex-wrap: wrap; gap: 10px; }
+    .logo { font-size: 1.1rem; }
+    .logo .year-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="logo">
+      <img src="logo.png" alt="GameTranslator Logo">
+      GameTranslator<span class="dot">.</span><span class="year-badge">© 2026</span>
+    </div>
+    <div class="lang-switcher">
+      <select id="uiLangSelect" aria-label="Interface language">
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="pl">🇵🇱 Polski</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <a href="index.html" class="back-btn" data-i18n="about_back_btn">← На главную</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero-about">
+    <h1 data-i18n="about_h1">О проекте GameTranslator</h1>
+    <p data-i18n="about_subtitle">Как мы помогаем игрокам со всего мира находить общий язык — буквально и фигурально.</p>
+  </div>
+
+  <article>
+
+    <h2 data-i18n="about_why_h2">Зачем это нужно</h2>
+    <p data-i18n="about_why_p1">Видеоигры давно перестали быть локальным развлечением. Игрок из Токио, Москвы, Сан-Паулу и Берлина может оказаться в одном голосовом чате или на одном форуме — и говорить об одних и тех же персонажах, механиках и предметах. Проблема в том, что каждый называет их по-своему:</p>
+    <ul>
+      <li data-i18n-html="about_why_li1"><strong>Johnny Silverhand</strong> в русской локализации стал <em>Джонни Сильверхендом</em>;</li>
+      <li data-i18n-html="about_why_li2"><strong>Vault 101</strong> в польской версии — <em>Krypta 101</em>, а в японской — <em>ヴォールト101</em>;</li>
+      <li data-i18n="about_why_li3">какой-нибудь каламбур из квеста в оригинале вообще не имеет смысла в переводе.</li>
+    </ul>
+    <p data-i18n="about_why_p2">GameTranslator собирает эти связи в одном месте — чтобы игроки, переводчики и фанаты могли быстро узнать, как называется нужный объект в любой стране мира.</p>
+
+    <h2 data-i18n="about_how_h2">Как это работает</h2>
+    <p data-i18n="about_how_p">Проект использует гибридный подход: поиск по вики + поиск в открытом интернете + генерация ответа нейросетью (так называемый RAG-подход). Вот полный конвейер:</p>
+
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-num">1</div>
+        <div class="pipeline-text">
+          <strong data-i18n="about_step1_t">Вы вводите запрос</strong>
+          <p data-i18n="about_step1_d">Игру (или серию), конкретный объект и, при необходимости, подпроект — сервер, плейс или режим. Например: Roblox → Doomspire → Brickbattle.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">2</div>
+        <div class="pipeline-text">
+          <strong data-i18n="about_step2_t">Сканер вики</strong>
+          <p data-i18n="about_step2_d">Мы обращаемся к MediaWiki API соответствующего фандома (Fandom, wiki.gg и других). Ищем страницу, подходящую по названию, и вытаскиваем её текст.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">3</div>
+        <div class="pipeline-text">
+          <strong data-i18n="about_step3_t">Поиск в интернете</strong>
+          <p data-i18n="about_step3_d">Параллельно мы ищем в открытых источниках — статьях, форумах, Reddit, официальных блогах разработчиков — упоминания термина в разных локализациях.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">4</div>
+        <div class="pipeline-text">
+          <strong data-i18n="about_step4_t">Сведение фактов</strong>
+          <p data-i18n="about_step4_d">Найденные фрагменты очищаются от мусора, объединяются и передаются нейросети как «контекст» — чтобы она отвечала на основе реальных источников, а не из головы.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">5</div>
+        <div class="pipeline-text">
+          <strong data-i18n="about_step5_t">Генерация ответа</strong>
+          <p data-i18n="about_step5_d">Модель получает задание: «найди, как объект называется в таких-то языках, оформи красиво, не выдумывай». На выходе — структурированная таблица с переводами.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 data-i18n="about_sources_h2">Источники данных</h2>
+    <ul>
+      <li data-i18n-html="about_sources_li1"><strong>Fandom и wiki.gg</strong> — крупнейшие фандомные вики, где сообщества фиксируют все тонкости локализаций.</li>
+      <li data-i18n-html="about_sources_li2"><strong>Официальные сайты и блоги разработчиков</strong> — первоисточник по названиям и терминам.</li>
+      <li data-i18n-html="about_sources_li3"><strong>Открытый веб</strong> — форумы, обсуждения, баг-репорты, статьи игровых журналистов.</li>
+    </ul>
+    <div class="callout" data-i18n-html="about_sources_callout">
+      <strong>Важно:</strong> мы не храним копии вики у себя и не претендуем на их контент. Мы лишь агрегируем публичную информацию и цитируем источники в ответе.
+    </div>
+
+    <h2 data-i18n="about_ethics_h2">Этические принципы</h2>
+    <p data-i18n-html="about_ethics_p">Проект сознательно строит свою политику вокруг трёх принципов, которые закреплены в <a href="index.html">Пользовательском соглашении</a>:</p>
+    <ul>
+      <li data-i18n-html="about_ethics_li1"><strong>Политическая независимость.</strong> Мы не связаны ни с одним государством или политическим блоком.</li>
+      <li data-i18n-html="about_ethics_li2"><strong>Без санкций.</strong> Сервис доступен пользователям всех стран без ограничений по географии.</li>
+      <li data-i18n-html="about_ethics_li3"><strong>Без цензуры.</strong> Мы не фильтруем контент, который переводим, — ни по идеологическим, ни по каким-либо другим причинам.</li>
+    </ul>
+
+    <h2 data-i18n="about_langs_h2">Языки</h2>
+    <p data-i18n="about_langs_p">Интерфейс доступен на 10 языках: русском, английском, испанском, португальском, китайском, японском, немецком, французском, польском и итальянском. Сами переводы ищутся на любом языке, который поддерживает источник, — от корейского до турецкого.</p>
+
+    <h2 data-i18n="about_plans_h2">Планы развития</h2>
+    <ul>
+      <li data-i18n-html="about_plans_li1"><strong>Прямое подключение к вики по поддомену.</strong> Сейчас поддомен угадывается автоматически; в планах — справочник известных вики.</li>
+      <li data-i18n-html="about_plans_li2"><strong>Кэширование запросов</strong> — чтобы повторные вопросы возвращались мгновенно и экономили ресурсы API.</li>
+      <li data-i18n-html="about_plans_li3"><strong>Стриминг ответа</strong> — чтобы нейросеть «печатала» ответ постепенно, как ChatGPT.</li>
+      <li data-i18n-html="about_plans_li4"><strong>Публичное API</strong> — для разработчиков, которые хотят встроить поиск терминов в свои приложения.</li>
+      <li data-i18n-html="about_plans_li5"><strong>Открытый код</strong> — публикация на GitHub с возможностью контрибьютить переводы и источники.</li>
+    </ul>
+
+    <h2 data-i18n="about_who_h2">Для кого этот проект</h2>
+    <ul>
+      <li data-i18n-html="about_who_li1"><strong>Игрокам</strong> — чтобы не теряться при переходе между локализациями и находить общий язык в международных сообществах.</li>
+      <li data-i18n-html="about_who_li2"><strong>Переводчикам</strong> — чтобы сверяться с официальными решениями и видеть контекст.</li>
+      <li data-i18n-html="about_who_li3"><strong>Исследователям</strong> — чтобы изучать, как культурные отсылки адаптируются в разных странах.</li>
+      <li data-i18n-html="about_who_li4"><strong>Разработчикам</strong> — чтобы понимать, как их игру «увидят» в других языках.</li>
+    </ul>
+
+    <h2 data-i18n="about_feedback_h2">Обратная связь</h2>
+    <p data-i18n-html="about_feedback_p">Проект открыт к предложениям, критике и идеям. Пишите на <a href="mailto:hello@gametranslator.example">hello@gametranslator.example</a> или открывайте issue на GitHub.</p>
+
+  </article>
+</main>
+
+<footer>
+  <p data-i18n="footer_text">© 2026 GameTranslator — проект об адаптивном переводе в играх.</p>
+</footer>
+
+<script>
+/* =========================================================
+   СЛОВАРИ ПЕРЕВОДОВ ДЛЯ ABOUT
+   Полные переводы: ru, en.
+   Остальные языки используют английский (fallback).
+   ========================================================= */
+const translations = {
+  ru: {
+    about_title: "О проекте — GameTranslator",
+    about_back_btn: "← На главную",
+    about_h1: "О проекте GameTranslator",
+    about_subtitle: "Как мы помогаем игрокам со всего мира находить общий язык — буквально и фигурально.",
+    about_why_h2: "Зачем это нужно",
+    about_why_p1: "Видеоигры давно перестали быть локальным развлечением. Игрок из Токио, Москвы, Сан-Паулу и Берлина может оказаться в одном голосовом чате или на одном форуме — и говорить об одних и тех же персонажах, механиках и предметах. Проблема в том, что каждый называет их по-своему:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> в русской локализации стал <em>Джонни Сильверхендом</em>;",
+    about_why_li2: "<strong>Vault 101</strong> в польской версии — <em>Krypta 101</em>, а в японской — <em>ヴォールト101</em>;",
+    about_why_li3: "какой-нибудь каламбур из квеста в оригинале вообще не имеет смысла в переводе.",
+    about_why_p2: "GameTranslator собирает эти связи в одном месте — чтобы игроки, переводчики и фанаты могли быстро узнать, как называется нужный объект в любой стране мира.",
+    about_how_h2: "Как это работает",
+    about_how_p: "Проект использует гибридный подход: поиск по вики + поиск в открытом интернете + генерация ответа нейросетью (так называемый RAG-подход). Вот полный конвейер:",
+    about_step1_t: "Вы вводите запрос",
+    about_step1_d: "Игру (или серию), конкретный объект и, при необходимости, подпроект — сервер, плейс или режим. Например: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Сканер вики",
+    about_step2_d: "Мы обращаемся к MediaWiki API соответствующего фандома (Fandom, wiki.gg и других). Ищем страницу, подходящую по названию, и вытаскиваем её текст.",
+    about_step3_t: "Поиск в интернете",
+    about_step3_d: "Параллельно мы ищем в открытых источниках — статьях, форумах, Reddit, официальных блогах разработчиков — упоминания термина в разных локализациях.",
+    about_step4_t: "Сведение фактов",
+    about_step4_d: "Найденные фрагменты очищаются от мусора, объединяются и передаются нейросети как «контекст» — чтобы она отвечала на основе реальных источников, а не из головы.",
+    about_step5_t: "Генерация ответа",
+    about_step5_d: "Модель получает задание: «найди, как объект называется в таких-то языках, оформи красиво, не выдумывай». На выходе — структурированная таблица с переводами.",
+    about_sources_h2: "Источники данных",
+    about_sources_li1: "<strong>Fandom и wiki.gg</strong> — крупнейшие фандомные вики, где сообщества фиксируют все тонкости локализаций.",
+    about_sources_li2: "<strong>Официальные сайты и блоги разработчиков</strong> — первоисточник по названиям и терминам.",
+    about_sources_li3: "<strong>Открытый веб</strong> — форумы, обсуждения, баг-репорты, статьи игровых журналистов.",
+    about_sources_callout: "<strong>Важно:</strong> мы не храним копии вики у себя и не претендуем на их контент. Мы лишь агрегируем публичную информацию и цитируем источники в ответе.",
+    about_ethics_h2: "Этические принципы",
+    about_ethics_p: "Проект сознательно строит свою политику вокруг трёх принципов, которые закреплены в <a href=\"index.html\">Пользовательском соглашении</a>:",
+    about_ethics_li1: "<strong>Политическая независимость.</strong> Мы не связаны ни с одним государством или политическим блоком.",
+    about_ethics_li2: "<strong>Без санкций.</strong> Сервис доступен пользователям всех стран без ограничений по географии.",
+    about_ethics_li3: "<strong>Без цензуры.</strong> Мы не фильтруем контент, который переводим, — ни по идеологическим, ни по каким-либо другим причинам.",
+    about_langs_h2: "Языки",
+    about_langs_p: "Интерфейс доступен на 10 языках: русском, английском, испанском, португальском, китайском, японском, немецком, французском, польском и итальянском. Сами переводы ищутся на любом языке, который поддерживает источник, — от корейского до турецкого.",
+    about_plans_h2: "Планы развития",
+    about_plans_li1: "<strong>Прямое подключение к вики по поддомену.</strong> Сейчас поддомен угадывается автоматически; в планах — справочник известных вики.",
+    about_plans_li2: "<strong>Кэширование запросов</strong> — чтобы повторные вопросы возвращались мгновенно и экономили ресурсы API.",
+    about_plans_li3: "<strong>Стриминг ответа</strong> — чтобы нейросеть «печатала» ответ постепенно, как ChatGPT.",
+    about_plans_li4: "<strong>Публичное API</strong> — для разработчиков, которые хотят встроить поиск терминов в свои приложения.",
+    about_plans_li5: "<strong>Открытый код</strong> — публикация на GitHub с возможностью контрибьютить переводы и источники.",
+    about_who_h2: "Для кого этот проект",
+    about_who_li1: "<strong>Игрокам</strong> — чтобы не теряться при переходе между локализациями и находить общий язык в международных сообществах.",
+    about_who_li2: "<strong>Переводчикам</strong> — чтобы сверяться с официальными решениями и видеть контекст.",
+    about_who_li3: "<strong>Исследователям</strong> — чтобы изучать, как культурные отсылки адаптируются в разных странах.",
+    about_who_li4: "<strong>Разработчикам</strong> — чтобы понимать, как их игру «увидят» в других языках.",
+    about_feedback_h2: "Обратная связь",
+    about_feedback_p: "Проект открыт к предложениям, критике и идеям. Пишите на <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> или открывайте issue на GitHub.",
+    footer_text: "© 2026 GameTranslator — проект об адаптивном переводе в играх."
+  },
+  en: {
+    about_title: "About — GameTranslator",
+    about_back_btn: "← Back to home",
+    about_h1: "About GameTranslator",
+    about_subtitle: "How we help players from all over the world find a common language — literally and figuratively.",
+    about_why_h2: "Why it matters",
+    about_why_p1: "Video games stopped being local entertainment long ago. A player from Tokyo, Moscow, São Paulo and Berlin can end up in the same voice chat or on the same forum — talking about the same characters, mechanics and items. The problem is that everyone names them differently:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> in the Russian localization became <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> in the Polish version is <em>Krypta 101</em>, and in Japanese — <em>ヴォールト101</em>;",
+    about_why_li3: "some quest pun in the original makes no sense at all in translation.",
+    about_why_p2: "GameTranslator brings all these links together — so players, translators and fans can quickly find out what the object is called in any country in the world.",
+    about_how_h2: "How it works",
+    about_how_p: "The project uses a hybrid approach: wiki search + open web search + AI-generated answer (the so-called RAG approach). Here is the full pipeline:",
+    about_step1_t: "You enter a query",
+    about_step1_d: "The game (or franchise), a specific object and, optionally, a subproject — a server, place or mode. For example: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Wiki scanner",
+    about_step2_d: "We query the MediaWiki API of the corresponding fandom (Fandom, wiki.gg and others). We find the page matching the title and extract its text.",
+    about_step3_t: "Web search",
+    about_step3_d: "In parallel, we search open sources — articles, forums, Reddit, official developer blogs — for mentions of the term in different localizations.",
+    about_step4_t: "Fact fusion",
+    about_step4_d: "The fragments we find are cleaned up, merged and passed to the AI as “context” — so it answers based on real sources, not from thin air.",
+    about_step5_t: "Answer generation",
+    about_step5_d: "The model gets a task: “find how the object is called in these languages, format it nicely, don't make anything up”. The output is a structured table of translations.",
+    about_sources_h2: "Data sources",
+    about_sources_li1: "<strong>Fandom and wiki.gg</strong> — the largest fandom wikis, where communities record every localization nuance.",
+    about_sources_li2: "<strong>Official developer sites and blogs</strong> — the primary source for names and terms.",
+    about_sources_li3: "<strong>The open web</strong> — forums, discussions, bug reports, articles by game journalists.",
+    about_sources_callout: "<strong>Important:</strong> we do not store copies of wikis and do not claim their content. We only aggregate public information and cite sources in the answer.",
+    about_ethics_h2: "Ethical principles",
+    about_ethics_p: "The project deliberately builds its policy around three principles, which are enshrined in the <a href=\"index.html\">Terms of Service</a>:",
+    about_ethics_li1: "<strong>Political independence.</strong> We are not affiliated with any state or political bloc.",
+    about_ethics_li2: "<strong>No sanctions.</strong> The service is available to users from all countries without geographic restrictions.",
+    about_ethics_li3: "<strong>No censorship.</strong> We do not filter the content we translate — for ideological or any other reasons.",
+    about_langs_h2: "Languages",
+    about_langs_p: "The interface is available in 10 languages: Russian, English, Spanish, Portuguese, Chinese, Japanese, German, French, Polish and Italian. Translations themselves are searched in any language the source supports — from Korean to Turkish.",
+    about_plans_h2: "Roadmap",
+    about_plans_li1: "<strong>Direct wiki connection by subdomain.</strong> Now the subdomain is guessed automatically; a directory of known wikis is planned.",
+    about_plans_li2: "<strong>Query caching</strong> — so repeated questions return instantly and save API resources.",
+    about_plans_li3: "<strong>Streaming answers</strong> — so the AI “types” the answer gradually, like ChatGPT.",
+    about_plans_li4: "<strong>Public API</strong> — for developers who want to embed term search into their own apps.",
+    about_plans_li5: "<strong>Open source</strong> — publication on GitHub with the ability to contribute translations and sources.",
+    about_who_h2: "Who this project is for",
+    about_who_li1: "<strong>Players</strong> — so they don't get lost when switching between localizations and find a common language in international communities.",
+    about_who_li2: "<strong>Translators</strong> — to check against official decisions and see the context.",
+    about_who_li3: "<strong>Researchers</strong> — to study how cultural references are adapted in different countries.",
+    about_who_li4: "<strong>Developers</strong> — to understand how their game will be “seen” in other languages.",
+    about_feedback_h2: "Feedback",
+    about_feedback_p: "The project is open to suggestions, criticism and ideas. Write to <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> or open an issue on GitHub.",
+    footer_text: "© 2026 GameTranslator — a project about adaptive game translation."
+  },
+  es: {
+    about_title: "Acerca de — GameTranslator",
+    about_back_btn: "← Volver al inicio",
+    about_h1: "Acerca de GameTranslator",
+    about_subtitle: "Cómo ayudamos a jugadores de todo el mundo a encontrar un idioma común — literal y figuradamente.",
+    about_why_h2: "Por qué es importante",
+    about_why_p1: "Los videojuegos dejaron de ser entretenimiento local hace mucho tiempo. Un jugador de Tokio, Moscú, São Paulo y Berlín puede terminar en el mismo chat de voz o foro, hablando de los mismos personajes, mecánicas y objetos. El problema es que cada uno los nombra de manera diferente:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> en la localización rusa se convirtió en <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> en la versión polaca es <em>Krypta 101</em>, y en japonés — <em>ヴォールト101</em>;",
+    about_why_li3: "algún juego de palabras de una misión en el original no tiene ningún sentido en la traducción.",
+    about_why_p2: "GameTranslator reúne todos estos vínculos en un solo lugar — para que jugadores, traductores y fans puedan descubrir rápidamente cómo se llama el objeto en cualquier país del mundo.",
+    about_how_h2: "Cómo funciona",
+    about_how_p: "El proyecto utiliza un enfoque híbrido: búsqueda en wiki + búsqueda web abierta + respuesta generada por IA (el llamado enfoque RAG). Aquí está el proceso completo:",
+    about_step1_t: "Introduces una consulta",
+    about_step1_d: "El juego (o franquicia), un objeto específico y, opcionalmente, un subproyecto: un servidor, lugar o modo. Por ejemplo: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Escáner de wiki",
+    about_step2_d: "Consultamos la API de MediaWiki del fandom correspondiente (Fandom, wiki.gg y otros). Encontramos la página que coincide con el título y extraemos su texto.",
+    about_step3_t: "Búsqueda web",
+    about_step3_d: "En paralelo, buscamos en fuentes abiertas — artículos, foros, Reddit, blogs oficiales de desarrolladores — menciones del término en diferentes localizaciones.",
+    about_step4_t: "Fusión de hechos",
+    about_step4_d: "Los fragmentos que encontramos se limpian, se combinan y se pasan a la IA como “contexto”, para que responda basándose en fuentes reales, no en el aire.",
+    about_step5_t: "Generación de respuestas",
+    about_step5_d: "El modelo recibe una tarea: “encuentra cómo se llama el objeto en estos idiomas, formatéalo bien, no te inventes nada”. La salida es una tabla estructurada de traducciones.",
+    about_sources_h2: "Fuentes de datos",
+    about_sources_li1: "<strong>Fandom y wiki.gg</strong> — las wikis de fandoms más grandes, donde las comunidades registran cada matiz de localización.",
+    about_sources_li2: "<strong>Sitios y blogs oficiales de desarrolladores</strong> — la fuente principal de nombres y términos.",
+    about_sources_li3: "<strong>La web abierta</strong> — foros, discusiones, informes de errores, artículos de periodistas de videojuegos.",
+    about_sources_callout: "<strong>Importante:</strong> no almacenamos copias de wikis y no reclamamos su contenido. Solo agregamos información pública y citamos fuentes en la respuesta.",
+    about_ethics_h2: "Principios éticos",
+    about_ethics_p: "El proyecto construye deliberadamente su política en torno a tres principios, consagrados en los <a href=\"index.html\">Términos de servicio</a>:",
+    about_ethics_li1: "<strong>Independencia política.</strong> No estamos afiliados a ningún estado o bloque político.",
+    about_ethics_li2: "<strong>Sin sanciones.</strong> El servicio está disponible para usuarios de todos los países sin restricciones geográficas.",
+    about_ethics_li3: "<strong>Sin censura.</strong> No filtramos el contenido que traducimos, por razones ideológicas o de cualquier otro tipo.",
+    about_langs_h2: "Idiomas",
+    about_langs_p: "La interfaz está disponible en 10 idiomas: ruso, inglés, español, portugués, chino, japonés, alemán, francés, polaco e italiano. Las traducciones en sí se buscan en cualquier idioma que admita la fuente, desde coreano hasta turco.",
+    about_plans_h2: "Hoja de ruta",
+    about_plans_li1: "<strong>Conexión directa a wiki por subdominio.</strong> Ahora el subdominio se adivina automáticamente; se planea un directorio de wikis conocidas.",
+    about_plans_li2: "<strong>Caché de consultas</strong> — para que las preguntas repetidas regresen instantáneamente y ahorren recursos de API.",
+    about_plans_li3: "<strong>Respuestas en streaming</strong> — para que la IA “escriba” la respuesta gradualmente, como ChatGPT.",
+    about_plans_li4: "<strong>API pública</strong> — para desarrolladores que desean integrar la búsqueda de términos en sus propias aplicaciones.",
+    about_plans_li5: "<strong>Código abierto</strong> — publicación en GitHub con la posibilidad de contribuir traducciones y fuentes.",
+    about_who_h2: "Para quién es este proyecto",
+    about_who_li1: "<strong>Jugadores</strong> — para que no se pierdan al cambiar entre localizaciones y encuentren un idioma común en comunidades internacionales.",
+    about_who_li2: "<strong>Traductores</strong> — para verificar contra las decisiones oficiales y ver el contexto.",
+    about_who_li3: "<strong>Investigadores</strong> — para estudiar cómo se adaptan las referencias culturales en diferentes países.",
+    about_who_li4: "<strong>Desarrolladores</strong> — para entender cómo su juego será “visto” en otros idiomas.",
+    about_feedback_h2: "Comentarios",
+    about_feedback_p: "El proyecto está abierto a sugerencias, críticas e ideas. Escribe a <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> o abre un issue en GitHub.",
+    footer_text: "© 2026 GameTranslator — un proyecto sobre traducción adaptativa en videojuegos."
+  },
+  pt: {
+    about_title: "Sobre — GameTranslator",
+    about_back_btn: "← Voltar ao início",
+    about_h1: "Sobre o GameTranslator",
+    about_subtitle: "Como ajudamos jogadores de todo o mundo a encontrar uma linguagem comum — literal e figurativamente.",
+    about_why_h2: "Por que isso importa",
+    about_why_p1: "Os videogames deixaram de ser entretenimento local há muito tempo. Um jogador de Tóquio, Moscou, São Paulo e Berlim pode acabar no mesmo chat de voz ou fórum — falando sobre os mesmos personagens, mecânicas e itens. O problema é que cada um os nomeia de forma diferente:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> na localização russa tornou-se <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> na versão polonesa é <em>Krypta 101</em>, e em japonês — <em>ヴォールト101</em>;",
+    about_why_li3: "algum trocadilho de missão no original não faz o menor sentido na tradução.",
+    about_why_p2: "O GameTranslator reúne todos esses links em um só lugar — para que jogadores, tradutores e fãs possam descobrir rapidamente como o objeto é chamado em qualquer país do mundo.",
+    about_how_h2: "Como funciona",
+    about_how_p: "O projeto usa uma abordagem híbrida: pesquisa em wiki + pesquisa na web aberta + resposta gerada por IA (a chamada abordagem RAG). Aqui está o pipeline completo:",
+    about_step1_t: "Você insere uma consulta",
+    about_step1_d: "O jogo (ou franquia), um objeto específico e, opcionalmente, um subprojeto — um servidor, local ou modo. Por exemplo: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Scanner de wiki",
+    about_step2_d: "Consultamos a API MediaWiki do fandom correspondente (Fandom, wiki.gg e outros). Encontramos a página que corresponde ao título e extraímos seu texto.",
+    about_step3_t: "Pesquisa na web",
+    about_step3_d: "Em paralelo, pesquisamos em fontes abertas — artigos, fóruns, Reddit, blogs oficiais de desenvolvedores — menções ao termo em diferentes localizações.",
+    about_step4_t: "Fusão de fatos",
+    about_step4_d: "Os fragmentos que encontramos são limpos, mesclados e passados para a IA como “contexto” — para que ela responda com base em fontes reais, não do nada.",
+    about_step5_t: "Geração de resposta",
+    about_step5_d: "O modelo recebe uma tarefa: “encontre como o objeto é chamado nesses idiomas, formate bem, não invente nada”. A saída é uma tabela estruturada de traduções.",
+    about_sources_h2: "Fontes de dados",
+    about_sources_li1: "<strong>Fandom e wiki.gg</strong> — as maiores wikis de fandom, onde as comunidades registram cada nuance de localização.",
+    about_sources_li2: "<strong>Sites e blogs oficiais de desenvolvedores</strong> — a fonte primária de nomes e termos.",
+    about_sources_li3: "<strong>A web aberta</strong> — fóruns, discussões, relatórios de bugs, artigos de jornalistas de jogos.",
+    about_sources_callout: "<strong>Importante:</strong> não armazenamos cópias de wikis e não reivindicamos seu conteúdo. Apenas agregamos informações públicas e citamos fontes na resposta.",
+    about_ethics_h2: "Princípios éticos",
+    about_ethics_p: "O projeto constrói deliberadamente sua política em torno de três princípios, consagrados nos <a href=\"index.html\">Termos de Serviço</a>:",
+    about_ethics_li1: "<strong>Independência política.</strong> Não somos afiliados a nenhum estado ou bloco político.",
+    about_ethics_li2: "<strong>Sem sanções.</strong> O serviço está disponível para usuários de todos os países sem restrições geográficas.",
+    about_ethics_li3: "<strong>Sem censura.</strong> Não filtramos o conteúdo que traduzimos — por razões ideológicas ou de qualquer outro tipo.",
+    about_langs_h2: "Idiomas",
+    about_langs_p: "A interface está disponível em 10 idiomas: russo, inglês, espanhol, português, chinês, japonês, alemão, francês, polonês e italiano. As próprias traduções são pesquisadas em qualquer idioma suportado pela fonte — do coreano ao turco.",
+    about_plans_h2: "Roteiro",
+    about_plans_li1: "<strong>Conexão direta à wiki por subdomínio.</strong> Agora o subdomínio é adivinhado automaticamente; um diretório de wikis conhecidas está planejado.",
+    about_plans_li2: "<strong>Cache de consultas</strong> — para que perguntas repetidas retornem instantaneamente e economizem recursos da API.",
+    about_plans_li3: "<strong>Respostas em streaming</strong> — para que a IA “digite” a resposta gradualmente, como o ChatGPT.",
+    about_plans_li4: "<strong>API pública</strong> — para desenvolvedores que desejam incorporar a pesquisa de termos em seus próprios aplicativos.",
+    about_plans_li5: "<strong>Código aberto</strong> — publicação no GitHub com a possibilidade de contribuir com traduções e fontes.",
+    about_who_h2: "Para quem é este projeto",
+    about_who_li1: "<strong>Jogadores</strong> — para que não se percam ao alternar entre localizações e encontrem uma linguagem comum em comunidades internacionais.",
+    about_who_li2: "<strong>Tradutores</strong> — para verificar as decisões oficiais e ver o contexto.",
+    about_who_li3: "<strong>Pesquisadores</strong> — para estudar como as referências culturais são adaptadas em diferentes países.",
+    about_who_li4: "<strong>Desenvolvedores</strong> — para entender como seu jogo será “visto” em outros idiomas.",
+    about_feedback_h2: "Feedback",
+    about_feedback_p: "O projeto está aberto a sugestões, críticas e ideias. Escreva para <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> ou abra uma issue no GitHub.",
+    footer_text: "© 2026 GameTranslator — um projeto sobre tradução adaptativa em jogos."
+  },
+  zh: {
+    about_title: "关于 — GameTranslator",
+    about_back_btn: "← 返回首页",
+    about_h1: "关于 GameTranslator",
+    about_subtitle: "我们如何帮助世界各地的玩家找到共同语言——无论是字面上还是比喻上。",
+    about_why_h2: "为什么这很重要",
+    about_why_p1: "电子游戏早已不再是地方性的娱乐。来自东京、莫斯科、圣保罗和柏林的玩家可能会在同一个语音聊天或论坛上，谈论相同的角色、机制和物品。问题是每个人对它们的称呼都不一样：",
+    about_why_li1: "<strong>Johnny Silverhand</strong> 在俄语本地化中变成了 <em>Джонни Сильверхенд</em>；",
+    about_why_li2: "<strong>Vault 101</strong> 在波兰语版本中是 <em>Krypta 101</em>，在日语中是 <em>ヴォールト101</em>；",
+    about_why_li3: "原版中某个任务的双关语在翻译中完全失去了意义。",
+    about_why_p2: "GameTranslator 将所有这些联系集中在一个地方——以便玩家、译者和粉丝可以快速了解该对象在世界任何国家的名称。",
+    about_how_h2: "它是如何工作的",
+    about_how_p: "该项目使用混合方法：维基搜索 + 开放网络搜索 + AI 生成的回答（即所谓的 RAG 方法）。以下是完整流程：",
+    about_step1_t: "您输入查询",
+    about_step1_d: "游戏（或系列）、特定对象，以及可选的子项目——服务器、地点或模式。例如：Roblox → Doomspire → Brickbattle。",
+    about_step2_t: "维基扫描器",
+    about_step2_d: "我们查询相应粉丝维基的 MediaWiki API（Fandom、wiki.gg 等）。我们找到与标题匹配的页面并提取其文本。",
+    about_step3_t: "网络搜索",
+    about_step3_d: "同时，我们在开放资源中搜索——文章、论坛、Reddit、官方开发者博客——不同本地化中对该术语的提及。",
+    about_step4_t: "事实融合",
+    about_step4_d: "我们找到的片段会被清理、合并，并作为“上下文”传递给 AI——以便它基于真实来源作答，而不是凭空捏造。",
+    about_step5_t: "生成回答",
+    about_step5_d: "模型获得一个任务：“找出该对象在这些语言中的称呼，将其精美排版，不要编造”。输出的是一个结构化的翻译表格。",
+    about_sources_h2: "数据来源",
+    about_sources_li1: "<strong>Fandom 和 wiki.gg</strong> —— 最大的粉丝维基，社区在这里记录每一个本地化细节。",
+    about_sources_li2: "<strong>官方开发者网站和博客</strong> —— 名称和术语的原始来源。",
+    about_sources_li3: "<strong>开放网络</strong> —— 论坛、讨论、错误报告、游戏记者的文章。",
+    about_sources_callout: "<strong>重要：</strong>我们不存储维基的副本，也不主张其内容的所有权。我们仅汇总公开信息并在回答中引用来源。",
+    about_ethics_h2: "道德原则",
+    about_ethics_p: "该项目刻意围绕三项原则构建其政策，这些原则已载入<a href=\"index.html\">服务条款</a>：",
+    about_ethics_li1: "<strong>政治独立。</strong>我们不隶属于任何国家或政治集团。",
+    about_ethics_li2: "<strong>无制裁。</strong>该服务向所有国家的用户开放，没有地理限制。",
+    about_ethics_li3: "<strong>无审查。</strong>我们不会出于意识形态或任何其他原因过滤我们翻译的内容。",
+    about_langs_h2: "语言",
+    about_langs_p: "界面支持 10 种语言：俄语、英语、西班牙语、葡萄牙语、中文、日语、德语、法语、波兰语和意大利语。翻译本身会在来源支持的任何语言中搜索——从韩语到土耳其语。",
+    about_plans_h2: "发展路线图",
+    about_plans_li1: "<strong>通过子域直接连接维基。</strong>现在子域是自动猜测的；计划建立一个已知维基目录。",
+    about_plans_li2: "<strong>查询缓存</strong> —— 以便重复的问题可以即时返回并节省 API 资源。",
+    about_plans_li3: "<strong>流式回答</strong> —— 以便 AI 像 ChatGPT 一样逐步“打字”回答。",
+    about_plans_li4: "<strong>公共 API</strong> —— 面向希望将术语搜索嵌入自己应用的开发者。",
+    about_plans_li5: "<strong>开源</strong> —— 在 GitHub 上发布，并允许贡献翻译和来源。",
+    about_who_h2: "这个项目适合谁",
+    about_who_li1: "<strong>玩家</strong> —— 以便他们在不同本地化之间切换时不会迷失，并在国际社区中找到共同语言。",
+    about_who_li2: "<strong>译者</strong> —— 对照官方决定并查看上下文。",
+    about_who_li3: "<strong>研究人员</strong> —— 研究文化引用在不同国家是如何被改编的。",
+    about_who_li4: "<strong>开发者</strong> —— 了解他们的游戏在其他语言中会“被看成什么样”。",
+    about_feedback_h2: "反馈",
+    about_feedback_p: "项目对建议、批评和想法持开放态度。请发送邮件至 <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> 或在 GitHub 上开启 issue。",
+    footer_text: "© 2026 GameTranslator — 一个关于游戏自适应翻译的项目。"
+  },
+  ja: {
+    about_title: "概要 — GameTranslator",
+    about_back_btn: "← ホームに戻る",
+    about_h1: "GameTranslator について",
+    about_subtitle: "世界中のプレイヤーが共通の言語を見つけるのをどのように支援するか — 文字通り、そして比喩的に。",
+    about_why_h2: "なぜ重要なのか",
+    about_why_p1: "ビデオゲームはとっくにローカルな娯楽ではなくなりました。東京、モスクワ、サンパウロ、ベルリンのプレイヤーが同じボイスチャットやフォーラムに集まり、同じキャラクター、メカニクス、アイテムについて話すことがあります。問題は、呼び方がそれぞれ異なることです：",
+    about_why_li1: "ロシア語版では <strong>Johnny Silverhand</strong> が <em>Джонни Сильверхенд</em> になりました。",
+    about_why_li2: "ポーランド語版の <strong>Vault 101</strong> は <em>Krypta 101</em>、日本語版では <em>ヴォールト101</em> です。",
+    about_why_li3: "クエストのダジャレが翻訳で全く意味が通じなくなることもあります。",
+    about_why_p2: "GameTranslator はこれらのつながりを一箇所に集めます — プレイヤー、翻訳者、ファンが世界中のどこでそのオブジェクトが何と呼ばれているかをすぐに調べられるように。",
+    about_how_h2: "仕組み",
+    about_how_p: "プロジェクトはハイブリッドアプローチを採用しています：ウィキ検索 + オープンウェブ検索 + AI 生成の回答（いわゆる RAG アプローチ）。完全なパイプラインは次のとおりです：",
+    about_step1_t: "クエリを入力する",
+    about_step1_d: "ゲーム（またはシリーズ）、特定のオブジェクト、およびオプションでサブプロジェクト（サーバー、場所、モード）。例：Roblox → Doomspire → Brickbattle。",
+    about_step2_t: "ウィキスキャナー",
+    about_step2_d: "対応するファンダムの MediaWiki API（Fandom、wiki.gg など）に問い合わせます。タイトルに一致するページを見つけ、そのテキストを抽出します。",
+    about_step3_t: "ウェブ検索",
+    about_step3_d: "並行して、記事、フォーラム、Reddit、開発者の公式ブログなどのオープンソースで、さまざまなローカライズにおける用語の言及を検索します。",
+    about_step4_t: "事実の融合",
+    about_step4_d: "見つかった断片はクリーンアップされ、マージされ、AI に「コンテキスト」として渡されます — ゼロからではなく実際の情報源に基づいて回答するためです。",
+    about_step5_t: "回答の生成",
+    about_step5_d: "モデルは「これらの言語でオブジェクトが何と呼ばれているかを見つけ、きれいにフォーマットし、何もでっち上げない」というタスクを受け取ります。出力は構造化された翻訳表です。",
+    about_sources_h2: "データソース",
+    about_sources_li1: "<strong>Fandom と wiki.gg</strong> — 最大のファンダムウィキで、コミュニティがローカライズのニュアンスをすべて記録しています。",
+    about_sources_li2: "<strong>開発者の公式サイトとブログ</strong> — 名前と用語の一次情報源。",
+    about_sources_li3: "<strong>オープンウェブ</strong> — フォーラム、ディスカッション、バグレポート、ゲームジャーナリストの記事。",
+    about_sources_callout: "<strong>重要：</strong>当社はウィキのコピーを保存せず、そのコンテンツを主張しません。公開情報を集約し、回答で情報源を引用するだけです。",
+    about_ethics_h2: "倫理的原則",
+    about_ethics_p: "プロジェクトは、<a href=\"index.html\">利用規約</a>に定められた 3 つの原則を中心にポリシーを構築しています：",
+    about_ethics_li1: "<strong>政治的独立。</strong>当社はいかなる国家や政治ブロックとも提携していません。",
+    about_ethics_li2: "<strong>制裁なし。</strong>サービスは地理的制限なしで全ユーザーに提供されます。",
+    about_ethics_li3: "<strong>検閲なし。</strong>イデオロギー的またはその他の理由で翻訳コンテンツをフィルタリングしません。",
+    about_langs_h2: "言語",
+    about_langs_p: "インターフェースは 10 言語で利用可能です：ロシア語、英語、スペイン語、ポルトガル語、中国語、日本語、ドイツ語、フランス語、ポーランド語、イタリア語。翻訳自体は、韓国語からトルコ語まで、ソースがサポートする任意の言語で検索されます。",
+    about_plans_h2: "ロードマップ",
+    about_plans_li1: "<strong>サブドメインによるウィキへの直接接続。</strong>現在、サブドメインは自動的に推測されます。既知のウィキのディレクトリが計画されています。",
+    about_plans_li2: "<strong>クエリキャッシュ</strong> — 繰り返しの質問が即座に返され、API リソースを節約します。",
+    about_plans_li3: "<strong>ストリーミング応答</strong> — AI が ChatGPT のように徐々に回答を「入力」します。",
+    about_plans_li4: "<strong>パブリック API</strong> — 用語検索を自分のアプリに埋め込みたい開発者向け。",
+    about_plans_li5: "<strong>オープンソース</strong> — GitHub で公開され、翻訳やソースに貢献できます。",
+    about_who_h2: "このプロジェクトの対象者",
+    about_who_li1: "<strong>プレイヤー</strong> — ローカライズ間の切り替えで迷わず、国際コミュニティで共通の言語を見つけるため。",
+    about_who_li2: "<strong>翻訳者</strong> — 公式の決定と照らし合わせ、コンテキストを確認するため。",
+    about_who_li3: "<strong>研究者</strong> — 文化的な参照が各国でどのように適応されるかを研究するため。",
+    about_who_li4: "<strong>開発者</strong> — 自分のゲームが他の言語でどう「見られる」かを理解するため。",
+    about_feedback_h2: "フィードバック",
+    about_feedback_p: "プロジェクトは提案、批判、アイデアを受け付けています。<a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> までメールするか、GitHub で issue を開いてください。",
+    footer_text: "© 2026 GameTranslator — ゲームの適応翻訳に関するプロジェクト。"
+  },
+  de: {
+    about_title: "Über — GameTranslator",
+    about_back_btn: "← Zurück zur Startseite",
+    about_h1: "Über GameTranslator",
+    about_subtitle: "Wie wir Spielern auf der ganzen Welt helfen, eine gemeinsame Sprache zu finden — im wörtlichen und im übertragenen Sinne.",
+    about_why_h2: "Warum das wichtig ist",
+    about_why_p1: "Videospiele sind längst keine lokale Unterhaltung mehr. Ein Spieler aus Tokio, Moskau, São Paulo und Berlin kann im selben Sprachchat oder Forum landen — und über dieselben Charaktere, Mechaniken und Gegenstände sprechen. Das Problem ist, dass jeder sie anders nennt:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> wurde in der russischen Lokalisierung zu <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> heißt in der polnischen Version <em>Krypta 101</em> und auf Japanisch <em>ヴォールト101</em>;",
+    about_why_li3: "irgendein Quest-Wortspiel im Original ergibt in der Übersetzung überhaupt keinen Sinn.",
+    about_why_p2: "GameTranslator bündelt all diese Verbindungen an einem Ort — damit Spieler, Übersetzer und Fans schnell herausfinden können, wie das Objekt in jedem Land der Welt heißt.",
+    about_how_h2: "Wie es funktioniert",
+    about_how_p: "Das Projekt verwendet einen hybriden Ansatz: Wiki-Suche + offene Websuche + KI-generierte Antwort (der sogenannte RAG-Ansatz). Hier ist die vollständige Pipeline:",
+    about_step1_t: "Sie geben eine Anfrage ein",
+    about_step1_d: "Das Spiel (oder die Franchise), ein bestimmtes Objekt und optional ein Teilprojekt — ein Server, Ort oder Modus. Zum Beispiel: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Wiki-Scanner",
+    about_step2_d: "Wir fragen die MediaWiki-API des entsprechenden Fandoms ab (Fandom, wiki.gg und andere). Wir finden die Seite, die dem Titel entspricht, und extrahieren ihren Text.",
+    about_step3_t: "Websuche",
+    about_step3_d: "Parallel dazu suchen wir in offenen Quellen — Artikeln, Foren, Reddit, offiziellen Entwicklerblogs — nach Erwähnungen des Begriffs in verschiedenen Lokalisierungen.",
+    about_step4_t: "Faktenfusion",
+    about_step4_d: "Die gefundenen Fragmente werden bereinigt, zusammengeführt und der KI als „Kontext“ übergeben — damit sie auf der Grundlage echter Quellen antwortet und nicht aus dem Nichts.",
+    about_step5_t: "Antwortgenerierung",
+    about_step5_d: "Das Modell erhält eine Aufgabe: „Finde heraus, wie das Objekt in diesen Sprachen heißt, formatiere es schön, erfinde nichts“. Die Ausgabe ist eine strukturierte Tabelle mit Übersetzungen.",
+    about_sources_h2: "Datenquellen",
+    about_sources_li1: "<strong>Fandom und wiki.gg</strong> — die größten Fandom-Wikis, in denen Communities jede Lokalisierungsnuance festhalten.",
+    about_sources_li2: "<strong>Offizielle Entwicklerseiten und -blogs</strong> — die Primärquelle für Namen und Begriffe.",
+    about_sources_li3: "<strong>Das offene Web</strong> — Foren, Diskussionen, Fehlerberichte, Artikel von Spielejournalisten.",
+    about_sources_callout: "<strong>Wichtig:</strong> Wir speichern keine Kopien von Wikis und erheben keinen Anspruch auf deren Inhalte. Wir aggregieren lediglich öffentliche Informationen und zitieren Quellen in der Antwort.",
+    about_ethics_h2: "Ethische Prinzipien",
+    about_ethics_p: "Das Projekt baut seine Politik bewusst auf drei Prinzipien auf, die in den <a href=\"index.html\">Nutzungsbedingungen</a> verankert sind:",
+    about_ethics_li1: "<strong>Politische Unabhängigkeit.</strong> Wir sind keinem Staat oder politischen Block angeschlossen.",
+    about_ethics_li2: "<strong>Keine Sanktionen.</strong> Der Dienst steht Nutzern aus allen Ländern ohne geografische Einschränkungen zur Verfügung.",
+    about_ethics_li3: "<strong>Keine Zensur.</strong> Wir filtern die Inhalte, die wir übersetzen, nicht — weder aus ideologischen noch aus anderen Gründen.",
+    about_langs_h2: "Sprachen",
+    about_langs_p: "Die Benutzeroberfläche ist in 10 Sprachen verfügbar: Russisch, Englisch, Spanisch, Portugiesisch, Chinesisch, Japanisch, Deutsch, Französisch, Polnisch und Italienisch. Die Übersetzungen selbst werden in jeder Sprache gesucht, die die Quelle unterstützt — von Koreanisch bis Türkisch.",
+    about_plans_h2: "Roadmap",
+    about_plans_li1: "<strong>Direkte Wiki-Verbindung per Subdomain.</strong> Jetzt wird die Subdomain automatisch erraten; ein Verzeichnis bekannter Wikis ist geplant.",
+    about_plans_li2: "<strong>Abfrage-Caching</strong> — damit wiederholte Fragen sofort zurückkehren und API-Ressourcen sparen.",
+    about_plans_li3: "<strong>Streaming-Antworten</strong> — damit die KI die Antwort nach und nach „tippt“, wie ChatGPT.",
+    about_plans_li4: "<strong>Öffentliche API</strong> — für Entwickler, die die Begriffssuche in ihre eigenen Apps einbetten möchten.",
+    about_plans_li5: "<strong>Open Source</strong> — Veröffentlichung auf GitHub mit der Möglichkeit, Übersetzungen und Quellen beizusteuern.",
+    about_who_h2: "Für wen dieses Projekt ist",
+    about_who_li1: "<strong>Spieler</strong> — damit sie beim Wechsel zwischen Lokalisierungen nicht verloren gehen und in internationalen Communities eine gemeinsame Sprache finden.",
+    about_who_li2: "<strong>Übersetzer</strong> — um offizielle Entscheidungen zu überprüfen und den Kontext zu sehen.",
+    about_who_li3: "<strong>Forscher</strong> — um zu untersuchen, wie kulturelle Referenzen in verschiedenen Ländern angepasst werden.",
+    about_who_li4: "<strong>Entwickler</strong> — um zu verstehen, wie ihr Spiel in anderen Sprachen „gesehen“ wird.",
+    about_feedback_h2: "Feedback",
+    about_feedback_p: "Das Projekt ist offen für Vorschläge, Kritik und Ideen. Schreiben Sie an <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> oder öffnen Sie ein Issue auf GitHub.",
+    footer_text: "© 2026 GameTranslator — ein Projekt zur adaptiven Spielübersetzung."
+  },
+  fr: {
+    about_title: "À propos — GameTranslator",
+    about_back_btn: "← Retour à l'accueil",
+    about_h1: "À propos de GameTranslator",
+    about_subtitle: "Comment nous aidons les joueurs du monde entier à trouver un langage commun — au sens propre comme au sens figuré.",
+    about_why_h2: "Pourquoi c'est important",
+    about_why_p1: "Les jeux vidéo ont cessé depuis longtemps d'être un divertissement local. Un joueur de Tokyo, Moscou, São Paulo et Berlin peut se retrouver dans le même chat vocal ou forum — en parlant des mêmes personnages, mécaniques et objets. Le problème est que chacun les nomme différemment :",
+    about_why_li1: "<strong>Johnny Silverhand</strong> est devenu <em>Джонни Сильверхенд</em> dans la localisation russe ;",
+    about_why_li2: "<strong>Vault 101</strong> dans la version polonaise est <em>Krypta 101</em>, et en japonais — <em>ヴォールト101</em> ;",
+    about_why_li3: "un jeu de mots de quête dans l'original n'a aucun sens dans la traduction.",
+    about_why_p2: "GameTranslator rassemble tous ces liens en un seul endroit — afin que les joueurs, traducteurs et fans puissent découvrir rapidement comment l'objet est appelé dans n'importe quel pays du monde.",
+    about_how_h2: "Comment ça marche",
+    about_how_p: "Le projet utilise une approche hybride : recherche wiki + recherche web ouverte + réponse générée par l'IA (l'approche dite RAG). Voici le pipeline complet :",
+    about_step1_t: "Vous saisissez une requête",
+    about_step1_d: "Le jeu (ou la franchise), un objet spécifique et, éventuellement, un sous-projet — un serveur, un lieu ou un mode. Par exemple : Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Scanner de wiki",
+    about_step2_d: "Nous interrogeons l'API MediaWiki du fandom correspondant (Fandom, wiki.gg et autres). Nous trouvons la page correspondant au titre et extrayons son texte.",
+    about_step3_t: "Recherche sur le Web",
+    about_step3_d: "En parallèle, nous recherchons dans des sources ouvertes — articles, forums, Reddit, blogs officiels de développeurs — des mentions du terme dans différentes localisations.",
+    about_step4_t: "Fusion des faits",
+    about_step4_d: "Les fragments que nous trouvons sont nettoyés, fusionnés et transmis à l'IA comme « contexte » — afin qu'elle réponde sur la base de sources réelles, et non de manière inventée.",
+    about_step5_t: "Génération de réponse",
+    about_step5_d: "Le modèle reçoit une tâche : « trouve comment l'objet est appelé dans ces langues, formate-le joliment, n'invente rien ». La sortie est un tableau structuré de traductions.",
+    about_sources_h2: "Sources de données",
+    about_sources_li1: "<strong>Fandom et wiki.gg</strong> — les plus grands wikis de fandom, où les communautés enregistrent chaque nuance de localisation.",
+    about_sources_li2: "<strong>Sites et blogs officiels des développeurs</strong> — la source principale des noms et des termes.",
+    about_sources_li3: "<strong>Le Web ouvert</strong> — forums, discussions, rapports de bugs, articles de journalistes de jeux vidéo.",
+    about_sources_callout: "<strong>Important :</strong> nous ne stockons pas de copies de wikis et ne revendiquons pas leur contenu. Nous agrégeons uniquement des informations publiques et citons les sources dans la réponse.",
+    about_ethics_h2: "Principes éthiques",
+    about_ethics_p: "Le projet construit délibérément sa politique autour de trois principes, inscrits dans les <a href=\"index.html\">Conditions d'utilisation</a> :",
+    about_ethics_li1: "<strong>Indépendance politique.</strong> Nous ne sommes affiliés à aucun État ni bloc politique.",
+    about_ethics_li2: "<strong>Pas de sanctions.</strong> Le service est disponible pour les utilisateurs de tous les pays sans restrictions géographiques.",
+    about_ethics_li3: "<strong>Pas de censure.</strong> Nous ne filtrons pas le contenu que nous traduisons — pour des raisons idéologiques ou autres.",
+    about_langs_h2: "Langues",
+    about_langs_p: "L'interface est disponible en 10 langues : russe, anglais, espagnol, portugais, chinois, japonais, allemand, français, polonais et italien. Les traductions elles-mêmes sont recherchées dans n'importe quelle langue prise en charge par la source — du coréen au turc.",
+    about_plans_h2: "Feuille de route",
+    about_plans_li1: "<strong>Connexion directe au wiki par sous-domaine.</strong> Maintenant, le sous-domaine est deviné automatiquement ; un annuaire des wikis connus est prévu.",
+    about_plans_li2: "<strong>Mise en cache des requêtes</strong> — pour que les questions répétées reviennent instantanément et économisent les ressources de l'API.",
+    about_plans_li3: "<strong>Réponses en streaming</strong> — pour que l'IA « tape » la réponse progressivement, comme ChatGPT.",
+    about_plans_li4: "<strong>API publique</strong> — pour les développeurs qui souhaitent intégrer la recherche de termes dans leurs propres applications.",
+    about_plans_li5: "<strong>Open source</strong> — publication sur GitHub avec la possibilité de contribuer aux traductions et aux sources.",
+    about_who_h2: "Pour qui est ce projet",
+    about_who_li1: "<strong>Joueurs</strong> — pour qu'ils ne se perdent pas en passant d'une localisation à l'autre et trouvent un langage commun dans les communautés internationales.",
+    about_who_li2: "<strong>Traducteurs</strong> — pour vérifier les décisions officielles et voir le contexte.",
+    about_who_li3: "<strong>Chercheurs</strong> — pour étudier comment les références culturelles sont adaptées dans différents pays.",
+    about_who_li4: "<strong>Développeurs</strong> — pour comprendre comment leur jeu sera « vu » dans d'autres langues.",
+    about_feedback_h2: "Retour d'information",
+    about_feedback_p: "Le projet est ouvert aux suggestions, critiques et idées. Écrivez à <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> ou ouvrez un ticket sur GitHub.",
+    footer_text: "© 2026 GameTranslator — un projet sur la traduction adaptative dans les jeux."
+  },
+  pl: {
+    about_title: "O projekcie — GameTranslator",
+    about_back_btn: "← Powrót do strony głównej",
+    about_h1: "O projekcie GameTranslator",
+    about_subtitle: "Jak pomagamy graczom z całego świata znaleźć wspólny język — dosłownie i w przenośni.",
+    about_why_h2: "Dlaczego to ważne",
+    about_why_p1: "Gry wideo dawno przestały być lokalną rozrywką. Gracz z Tokio, Moskwy, São Paulo i Berlina może trafić do tego samego czatu głosowego lub forum — rozmawiając o tych samych postaciach, mechanikach i przedmiotach. Problem w tym, że każdy nazywa je inaczej:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> w polskiej lokalizacji stał się <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> w wersji polskiej to <em>Krypta 101</em>, a w japońskiej — <em>ヴォールト101</em>;",
+    about_why_li3: "jakiś żart słowny z zadania w oryginale w ogóle nie ma sensu w tłumaczeniu.",
+    about_why_p2: "GameTranslator łączy te wszystkie powiązania w jednym miejscu — aby gracze, tłumacze i fani mogli szybko dowiedzieć się, jak obiekt nazywa się w dowolnym kraju na świecie.",
+    about_how_h2: "Jak to działa",
+    about_how_p: "Projekt wykorzystuje podejście hybrydowe: wyszukiwanie w wiki + wyszukiwanie w otwartej sieci + odpowiedź generowana przez AI (tzw. podejście RAG). Oto pełny potok:",
+    about_step1_t: "Wpisujesz zapytanie",
+    about_step1_d: "Grę (lub serię), konkretny obiekt i opcjonalnie podprojekt — serwer, miejsce lub tryb. Na przykład: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Skaner wiki",
+    about_step2_d: "Odpytywujemy API MediaWiki odpowiedniego fandomu (Fandom, wiki.gg i inne). Znajdujemy stronę pasującą do tytułu i wyodrębniamy jej tekst.",
+    about_step3_t: "Wyszukiwanie w sieci",
+    about_step3_d: "Równolegle szukamy w otwartych źródłach — artykułach, forach, Reddicie, oficjalnych blogach deweloperów — wzmianek o terminie w różnych lokalizacjach.",
+    about_step4_t: "Fuzja faktów",
+    about_step4_d: "Znalezione fragmenty są czyszczone, scalane i przekazywane do AI jako „kontekst” — aby odpowiadała na podstawie rzeczywistych źródeł, a nie znikąd.",
+    about_step5_t: "Generowanie odpowiedzi",
+    about_step5_d: "Model otrzymuje zadanie: „znajdź, jak obiekt nazywa się w tych językach, sformatuj to ładnie, niczego nie wymyślaj”. Wynikiem jest ustrukturyzowana tabela tłumaczeń.",
+    about_sources_h2: "Źródła danych",
+    about_sources_li1: "<strong>Fandom i wiki.gg</strong> — największe wiki fandomowe, w których społeczności rejestrują każdy niuans lokalizacji.",
+    about_sources_li2: "<strong>Oficjalne strony i blogi deweloperów</strong> — podstawowe źródło nazw i terminów.",
+    about_sources_li3: "<strong>Otwarta sieć</strong> — fora, dyskusje, raporty o błędach, artykuły dziennikarzy grotwych.",
+    about_sources_callout: "<strong>Ważne:</strong> nie przechowujemy kopii wiki i nie rościmy sobie praw do ich treści. Jedynie agregujemy informacje publiczne i cytujemy źródła w odpowiedzi.",
+    about_ethics_h2: "Zasady etyczne",
+    about_ethics_p: "Projekt celowo buduje swoją politykę wokół trzech zasad zapisanych w <a href=\"index.html\">Warunkach korzystania</a>:",
+    about_ethics_li1: "<strong>Niezależność polityczna.</strong> Nie jesteśmy powiązani z żadnym państwem ani blokiem politycznym.",
+    about_ethics_li2: "<strong>Brak sankcji.</strong> Usługa jest dostępna dla użytkowników ze wszystkich krajów bez ograniczeń geograficznych.",
+    about_ethics_li3: "<strong>Brak cenzury.</strong> Nie filtrujemy treści, które tłumaczymy — ze względów ideologicznych ani żadnych innych.",
+    about_langs_h2: "Języki",
+    about_langs_p: "Interfejs jest dostępny w 10 językach: rosyjskim, angielskim, hiszpańskim, portugalskim, chińskim, japońskim, niemieckim, francuskim, polskim i włoskim. Same tłumaczenia są wyszukiwane w dowolnym języku obsługiwanym przez źródło — od koreańskiego po turecki.",
+    about_plans_h2: "Plan rozwoju",
+    about_plans_li1: "<strong>Bezpośrednie połączenie z wiki przez subdomenę.</strong> Teraz subdomena jest zgadywana automatycznie; planowany jest katalog znanych wiki.",
+    about_plans_li2: "<strong>Buforowanie zapytań</strong> — aby powtarzające się pytania wracały natychmiast i oszczędzały zasoby API.",
+    about_plans_li3: "<strong>Odpowiedzi strumieniowe</strong> — aby AI „pisała” odpowiedź stopniowo, jak ChatGPT.",
+    about_plans_li4: "<strong>Publiczne API</strong> — dla deweloperów, którzy chcą osadzić wyszukiwanie terminów w swoich aplikacjach.",
+    about_plans_li5: "<strong>Open source</strong> — publikacja na GitHubie z możliwością współtworzenia tłumaczeń i źródeł.",
+    about_who_h2: "Dla kogo jest ten projekt",
+    about_who_li1: "<strong>Graczy</strong> — aby nie gubili się przy przełączaniu między lokalizacjami i znajdowali wspólny język w międzynarodowych społecznościach.",
+    about_who_li2: "<strong>Tłumaczy</strong> — aby weryfikować oficjalne decyzje i widzieć kontekst.",
+    about_who_li3: "<strong>Badaczy</strong> — aby badać, jak odniesienia kulturowe są adaptowane w różnych krajach.",
+    about_who_li4: "<strong>Deweloperów</strong> — aby zrozumieć, jak ich gra będzie „widziana” w innych językach.",
+    about_feedback_h2: "Informacje zwrotne",
+    about_feedback_p: "Projekt jest otwarty na sugestie, krytykę i pomysły. Napisz na <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> lub otwórz zgłoszenie na GitHubie.",
+    footer_text: "© 2026 GameTranslator — projekt o adaptacyjnym tłumaczeniu gier."
+  },
+  it: {
+    about_title: "Informazioni — GameTranslator",
+    about_back_btn: "← Torna alla home",
+    about_h1: "Informazioni su GameTranslator",
+    about_subtitle: "Come aiutiamo i giocatori di tutto il mondo a trovare un linguaggio comune — letteralmente e figuratamente.",
+    about_why_h2: "Perché è importante",
+    about_why_p1: "I videogiochi hanno smesso da tempo di essere un intrattenimento locale. Un giocatore di Tokyo, Mosca, San Paolo e Berlino può ritrovarsi nella stessa chat vocale o forum — parlando degli stessi personaggi, meccaniche e oggetti. Il problema è che ognuno li chiama in modo diverso:",
+    about_why_li1: "<strong>Johnny Silverhand</strong> nella localizzazione russa è diventato <em>Джонни Сильверхенд</em>;",
+    about_why_li2: "<strong>Vault 101</strong> nella versione polacca è <em>Krypta 101</em>, e in giapponese — <em>ヴォールト101</em>;",
+    about_why_li3: "qualche gioco di parole della missione nell'originale non ha alcun senso nella traduzione.",
+    about_why_p2: "GameTranslator riunisce tutti questi collegamenti in un unico posto — in modo che giocatori, traduttori e fan possano scoprire rapidamente come viene chiamato l'oggetto in qualsiasi paese del mondo.",
+    about_how_h2: "Come funziona",
+    about_how_p: "Il progetto utilizza un approccio ibrido: ricerca wiki + ricerca web aperta + risposta generata dall'IA (il cosiddetto approccio RAG). Ecco la pipeline completa:",
+    about_step1_t: "Inserisci una query",
+    about_step1_d: "Il gioco (o franchise), un oggetto specifico e, facoltativamente, un sottoprogetto — un server, luogo o modalità. Ad esempio: Roblox → Doomspire → Brickbattle.",
+    about_step2_t: "Scanner wiki",
+    about_step2_d: "Interroghiamo l'API MediaWiki del fandom corrispondente (Fandom, wiki.gg e altri). Troviamo la pagina che corrisponde al titolo ed estraiamo il suo testo.",
+    about_step3_t: "Ricerca web",
+    about_step3_d: "Parallelamente, cerchiamo in fonti aperte — articoli, forum, Reddit, blog ufficiali degli sviluppatori — menzioni del termine in diverse localizzazioni.",
+    about_step4_t: "Fusione dei fatti",
+    about_step4_d: "I frammenti che troviamo vengono puliti, uniti e passati all'IA come “contesto” — in modo che risponda sulla base di fonti reali, non inventate.",
+    about_step5_t: "Generazione della risposta",
+    about_step5_d: "Il modello riceve un compito: “trova come viene chiamato l'oggetto in queste lingue, formattalo bene, non inventare nulla”. L'output è una tabella strutturata di traduzioni.",
+    about_sources_h2: "Fonti dei dati",
+    about_sources_li1: "<strong>Fandom e wiki.gg</strong> — le più grandi wiki di fandom, dove le community registrano ogni sfumatura di localizzazione.",
+    about_sources_li2: "<strong>Siti e blog ufficiali degli sviluppatori</strong> — la fonte principale per nomi e termini.",
+    about_sources_li3: "<strong>Il web aperto</strong> — forum, discussioni, segnalazioni di bug, articoli di giornalisti di videogiochi.",
+    about_sources_callout: "<strong>Importante:</strong> non memorizziamo copie di wiki e non rivendichiamo il loro contenuto. Aggreghiamo solo informazioni pubbliche e citiamo le fonti nella risposta.",
+    about_ethics_h2: "Principi etici",
+    about_ethics_p: "Il progetto costruisce deliberatamente la sua politica attorno a tre principi, sanciti nei <a href=\"index.html\">Termini di servizio</a>:",
+    about_ethics_li1: "<strong>Indipendenza politica.</strong> Non siamo affiliati a nessuno stato o blocco politico.",
+    about_ethics_li2: "<strong>Nessuna sanzione.</strong> Il servizio è disponibile per gli utenti di tutti i paesi senza restrizioni geografiche.",
+    about_ethics_li3: "<strong>Nessuna censura.</strong> Non filtriamo il contenuto che traduciamo — per ragioni ideologiche o di qualsiasi altro tipo.",
+    about_langs_h2: "Lingue",
+    about_langs_p: "L'interfaccia è disponibile in 10 lingue: russo, inglese, spagnolo, portoghese, cinese, giapponese, tedesco, francese, polacco e italiano. Le traduzioni stesse vengono cercate in qualsiasi lingua supportata dalla fonte — dal coreano al turco.",
+    about_plans_h2: "Roadmap",
+    about_plans_li1: "<strong>Connessione diretta alla wiki tramite sottodominio.</strong> Ora il sottodominio viene indovinato automaticamente; è prevista una directory delle wiki conosciute.",
+    about_plans_li2: "<strong>Cache delle query</strong> — in modo che le domande ripetute ritornino immediatamente e risparmino risorse API.",
+    about_plans_li3: "<strong>Risposte in streaming</strong> — in modo che l'IA “digitì” la risposta gradualmente, come ChatGPT.",
+    about_plans_li4: "<strong>API pubblica</strong> — per gli sviluppatori che desiderano integrare la ricerca di termini nelle proprie app.",
+    about_plans_li5: "<strong>Open source</strong> — pubblicazione su GitHub con la possibilità di contribuire a traduzioni e fonti.",
+    about_who_h2: "A chi è rivolto questo progetto",
+    about_who_li1: "<strong>Giocatori</strong> — in modo che non si perdano quando passano da una localizzazione all'altra e trovino un linguaggio comune nelle community internazionali.",
+    about_who_li2: "<strong>Traduttori</strong> — per verificare le decisioni ufficiali e vedere il contesto.",
+    about_who_li3: "<strong>Ricercatori</strong> — per studiare come i riferimenti culturali vengono adattati in diversi paesi.",
+    about_who_li4: "<strong>Sviluppatori</strong> — per capire come il loro gioco sarà “visto” in altre lingue.",
+    about_feedback_h2: "Feedback",
+    about_feedback_p: "Il progetto è aperto a suggerimenti, critiche e idee. Scrivi a <a href=\"mailto:hello@gametranslator.example\">hello@gametranslator.example</a> o apri una issue su GitHub.",
+    footer_text: "© 2026 GameTranslator — un progetto sulla traduzione adattiva nei giochi."
+  }
+};
+
+/* =========================================================
+   ЛОГИКА i18n ДЛЯ ABOUT
+   ========================================================= */
+const uiLangSelect = document.getElementById('uiLangSelect');
+
+function detectInitialLang() {
+  const saved = localStorage.getItem('uiLang');
+  if (saved && translations[saved]) return saved;
+  // Если сохранён язык, для которого нет перевода about,
+  // но он есть в index (например, de) — используем английский fallback
+  if (saved) return 'en';
+  return 'en';
+}
+
+function applyLang(lang) {
+  const t = translations[lang] || translations.en;
+  const fallback = translations.en;
+
+  document.documentElement.lang = lang;
+
+  // Заголовок вкладки
+  if (t.about_title) document.title = t.about_title;
+
+  // Обычные текстовые ключи
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.textContent = val;
+  });
+
+  // Ключи с HTML-разметкой (ссылки, strong, em)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.innerHTML = val;
+  });
+
+  uiLangSelect.value = lang;
+  localStorage.setItem('uiLang', lang);
+}
+
+uiLangSelect.addEventListener('change', (e) => applyLang(e.target.value));
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+const initial = detectInitialLang();
+applyLang(initial);
+// Синхронизируем селект с реально применённым языком
+uiLangSelect.value = translations[initial] ? initial : 'en';
+</script>
+</body>
+</html>
