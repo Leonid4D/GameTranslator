@@ -69,6 +69,9 @@
     margin-left: 6px;
     letter-spacing: 0.03em;
   }
+  .burger-menu {
+    display: none;
+  }
   .nav-links {
     display: flex;
     gap: 22px;
@@ -820,7 +823,34 @@
 
   /* --- ПЛАНШЕТЫ (до 768px) --- */
   @media (max-width: 768px) {
-    .nav-links { display: none; } /* Скрываем текстовое меню, оставляем лого и кнопки */
+    .burger-menu {
+      display: block; /* Показываем кнопку на мобильных */
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.2rem;
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-left: auto; /* Прижимаем вправо */
+      margin-right: 10px;
+    }
+
+    .nav-links {
+      display: none; /* Скрываем меню по умолчанию */
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: var(--card);
+      flex-direction: column;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      gap: 16px;
+      z-index: 99;
+    }
+    .nav-links.active {
+      display: flex; /* Показываем, когда нажата кнопка */
+    }
     
     .nav { 
       flex-wrap: wrap; /* Позволяем шапке переноситься на новую строку */
@@ -926,7 +956,8 @@
       GameTranslator<span class="dot">.</span>
       <span class="year-badge">© 2026</span>
     </div>
-    <ul class="nav-links">
+    <button class="burger-menu" id="burgerBtn">☰</button>
+    <ul class="nav-links" id="navLinks">
       <li><a href="about.html" data-i18n="nav_about">О проекте</a></li>
       <li><a href="#features" data-i18n="nav_features">Возможности</a></li>
       <li><a href="#examples" data-i18n="nav_examples">Примеры</a></li>
@@ -2692,6 +2723,17 @@ applyLang = function(lang) {
   }
 };
 
+/* =========================================================
+   МОБИЛЬНОЕ МЕНЮ (ГАМБУРГЕР)
+   ========================================================= */
+const burgerBtn = document.getElementById('burgerBtn');
+const navLinks = document.getElementById('navLinks');
+
+if (burgerBtn && navLinks) {
+  burgerBtn.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+  });
+}
 applyLang(detectInitialLang());
 initTos();
 initFromURL();
