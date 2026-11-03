@@ -814,12 +814,105 @@
   footer a { color: var(--muted); }
   footer a:hover { color: var(--accent); }
 
-  @media (max-width: 720px) {
-    .nav-links { display: none; }
-    .search-panel { padding: 20px; }
-    .hero { padding-top: 40px; }
-    .logo { font-size: 1.15rem; }
+  /* =========================================
+     АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И ТЕЛЕФОНОВ
+     ========================================= */
+
+  /* --- ПЛАНШЕТЫ (до 768px) --- */
+  @media (max-width: 768px) {
+    .nav-links { display: none; } /* Скрываем текстовое меню, оставляем лого и кнопки */
+    
+    .nav { 
+      flex-wrap: wrap; /* Позволяем шапке переноситься на новую строку */
+      padding: 12px 16px;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    
+    .logo { margin-right: 0; }
     .logo .year-badge { display: none; }
+
+    .hero { padding: 40px 16px 30px; }
+    
+    .search-panel { 
+      padding: 20px; 
+      border-radius: 12px;
+    }
+
+    .pricing-grid { 
+      grid-template-columns: 1fr; /* Карточки тарифов встают в столбик */
+    }
+
+    .modal-box {
+      max-height: 95vh; /* Модалки занимают почти весь экран по высоте */
+    }
+
+    .ad-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 10px 16px;
+    }
+  }
+
+  /* --- ТЕЛЕФОНЫ (до 480px) --- */
+  @media (max-width: 480px) {
+    .logo { font-size: 1.1rem; }
+    .logo img { height: 28px; width: 28px; }
+
+    .btn-premium {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+    }
+
+    .lang-switcher select {
+      font-size: 0.75rem;
+      padding: 5px 8px;
+    }
+
+    .hero h1 { font-size: 1.6rem; }
+    .hero p { font-size: 0.9rem; }
+
+    .search-tabs {
+      flex-direction: column; /* Вкладки встают друг под другом */
+      gap: 4px;
+      border-bottom: none;
+    }
+    .search-tab {
+      border-bottom: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .search-tab.active {
+      border-bottom-color: var(--accent);
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .step-body input { font-size: 1rem; } /* Увеличиваем шрифт, чтобы iOS не зумил экран при клике */
+    
+    .pro-options { flex-direction: column; align-items: flex-start; }
+    .pro-options label, .pro-options button { width: 100%; text-align: center; justify-content: center; }
+
+    /* Окно результатов */
+    .answer-header { flex-direction: column; gap: 8px; }
+    .answer-tools { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-copy { width: 100%; }
+
+    /* Таблицы внутри ответа нейросети */
+    .answer-box table { display: block; overflow-x: auto; white-space: nowrap; }
+
+    /* Модальные окна */
+    .modal-box { width: 95%; margin: 10px; }
+    .modal-content { padding: 16px; }
+    .modal-box h2 { font-size: 1rem; padding: 16px; }
+    
+    /* Внутренности модалки Premium */
+    .pricing-card { padding: 15px; }
+    .pricing-card h3 { font-size: 1rem; }
+    .pricing-card .price { font-size: 1.3rem; }
+
+    /* Глоссарий */
+    #glossaryFrom, #glossaryTo { font-size: 0.85rem; padding: 6px; }
+    .modal-content div[style*="display: flex; gap: 10px;"] { flex-direction: column; }
   }
 </style>
 </head>
