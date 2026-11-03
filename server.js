@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 // 2. Настройка CORS
 // ВАЖНО: Замените 'https://your-frontend.github.io' на реальный URL вашего GitHub Pages
-const allowedOrigins = ['https://your-frontend.github.io'];
+const allowedOrigins = ['https://leonid4d.github.io/GameTranslator/'];
 app.use(cors({
     origin: function (origin, callback) {
         // Разрешаем запросы без origin (например, от Postman) и с вашего домена
@@ -165,7 +165,7 @@ app.post('/api/translate', async (req, res) => {
         // --- Отправка запроса к LLM ---
         // Используем OpenAI-совместимый эндпоинт (подходит для OpenAI, DeepSeek, OpenRouter)
         const llmResponse = await axios.post(`${process.env.LLM_BASE_URL}/chat/completions`, {
-            model: 'gpt-3.5-turbo', // Или 'deepseek-chat', 'openrouter/auto' и т.д.
+            model: 'deepseek-chat',
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.3, // Низкая температура для большей точности
         }, {

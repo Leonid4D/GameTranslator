@@ -2573,9 +2573,10 @@ const iframeCloseBtn = document.getElementById('iframeCloseBtn');
 const translatedFrame = document.getElementById('translatedFrame');
 const iframeTitle = document.getElementById('iframeTitle');
 
-translatePageBtn.addEventListener('click', () => {
+translatePageBtn.addEventListener('click', async () => {
   const url = pageUrlInput.value.trim();
 
+  // Проверка доступа (у нас в бэкенде тоже стоит проверка userTier >= 2)
   if (!hasAccess(2)) {
     subModal.classList.add('visible');
     return;
@@ -2588,15 +2589,47 @@ translatePageBtn.addEventListener('click', () => {
 
   iframeTitle.textContent = url;
   iframeModal.classList.add('visible');
+  
+  // Показываем заглушку загрузки
   translatedFrame.srcdoc = `
     <div style="font-family: sans-serif; padding: 50px; text-align: center; color: #333;">
-      <h1>Здесь будет переведённая страница</h1>
-      <p>Адрес: <b>${url}</b></p>
-      <p style="color: #888; margin-top: 20px;">
-        (В реальности бэкенд скачает этот сайт, переведет весь текст и отдаст готовый HTML сюда).
-      </p>
+      <h2>Загрузка и перевод страницы...</h2>
+      <p>Пожалуйста, подождите. Это может занять до 30 секунд.</p>
     </div>
   `;
+
+  try {
+    // Отправляем запрос на наш бэкенд
+    const response = await fetch('http://localhost:3000/api/proxy-translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: url,
+        targetLang: uiLang, // Передаем текущий язык интерфейса (или можно добавить селект)
+        userTier: userTierLevel
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText || 'Ошибка при переводе страницы');
+    }
+
+    // Получаем HTML-код переведенной страницы
+    const translatedHtml = await response.text();
+    
+    // Вставляем его в iframe
+    translatedFrame.srcdoc = translatedHtml;
+
+  } catch (error) {
+    console.error(error);
+    translatedFrame.srcdoc = `
+      <div style="font-family: sans-serif; padding: 50px; text-align: center; color: #d32f2f;">
+        <h2>Ошибка</h2>
+        <p>${error.message}</p>
+      </div>
+    `;
+  }
 });
 
 iframeCloseBtn.addEventListener('click', () => {
