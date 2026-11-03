@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameTranslator — адаптивный перевод игр</title>
+<link rel="icon" type="image/png" href="logo.png">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-alt: #161b22;
+    --card: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #7ee787;
+    --danger: #ff7b72;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- Шапка ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo {
+    font-size: 1.35rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: auto;
+    white-space: nowrap;
+  }
+  .logo .dot { color: var(--accent); }
+  .logo img {
+    height: 34px;
+    width: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .logo .year-badge {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 6px;
+    letter-spacing: 0.03em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 22px;
+    list-style: none;
+  }
+  .nav-links a { color: var(--muted); font-size: 0.9rem; }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+  .lang-switcher { display: flex; align-items: center; }
+  .lang-switcher select {
+    background: var(--bg-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+    transition: border-color .2s;
+  }
+  .lang-switcher select:hover,
+  .lang-switcher select:focus { border-color: var(--accent); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 70px 24px 50px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(1.9rem, 5vw, 3.1rem);
+    line-height: 1.15;
+    margin-bottom: 20px;
+    background: linear-gradient(120deg, #58a6ff, #7ee787);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 650px;
+    margin: 0 auto 32px;
+  }
+
+  /* ---------- Двухступенчатый поиск ---------- */
+  .search-panel {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px;
+    text-align: left;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  }
+  .search-step { display: flex; gap: 14px; align-items: flex-start; }
+  .step-badge {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all .25s ease;
+  }
+  .search-step.filled .step-badge {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d1117;
+    transform: scale(1.05);
+  }
+  .step-body { flex: 1; min-width: 0; }
+  .step-body label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .step-body input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .step-body input::placeholder { color: #5c6370; }
+  .step-body input:focus { border-color: var(--accent); background: var(--bg); }
+
+  .step-connector {
+    margin-left: 16px;
+    width: 2px;
+    height: 22px;
+    background: var(--border);
+    transition: background .25s ease;
+  }
+  .step-connector.active { background: var(--accent); }
+
+  .search-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #0d1117;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+  }
+  .search-btn:hover { opacity: 0.92; }
+  .search-btn:active { transform: scale(0.98); }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .optional-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    color: var(--muted);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 8px;
+    margin-left: 6px;
+    text-transform: lowercase;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  /* ---------- Языки поиска ---------- */
+  .langs-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  .langs-section > label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .langs-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .langs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-top: 0;
+  }
+  .lang-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all .2s;
+  }
+  .lang-chip.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(88, 166, 255, 0.1);
+  }
+
+  /* ---------- Результаты ---------- */
+  .result-container {
+    max-width: 600px;
+    margin: 30px auto 0;
+    text-align: left;
+    display: none;
+  }
+  .loading-indicator {
+    display: none;
+    text-align: center;
+    color: var(--muted);
+    padding: 20px;
+  }
+  .loading-indicator .spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .answer-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    line-height: 1.7;
+    display: none;
+  }
+  .answer-box h1, .answer-box h2, .answer-box h3 {
+    margin-top: 1em; margin-bottom: 0.5em; color: var(--accent-2);
+  }
+  .answer-box table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+  .answer-box th, .answer-box td {
+    border: 1px solid var(--border); padding: 8px 12px; text-align: left;
+  }
+  .answer-box th { background: var(--bg-alt); }
+  .answer-box ul, .answer-box ol { padding-left: 1.5em; margin: 0.5em 0; }
+  .answer-box code { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .answer-box pre { background: var(--bg-alt); padding: 14px; border-radius: 8px; overflow-x: auto; }
+  .answer-box pre code { background: none; padding: 0; }
+
+  /* ---------- Секции ---------- */
+  section { padding: 60px 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .accent-text { color: var(--accent-2); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 26px;
+    transition: transform .2s, border-color .2s;
+  }
+  .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .card .icon { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+  .card h3 { margin-bottom: 8px; font-size: 1.1rem; }
+  .card p { color: var(--muted); font-size: 0.92rem; }
+
+  /* ---------- Таблица примеров ---------- */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card);
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  th, td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th {
+    background: var(--bg-alt);
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(88, 166, 255, 0.05); }
+  td:first-child { color: var(--accent-2); font-weight: 600; }
+    /* ---------- TOS-модалка ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-overlay.visible { display: flex; }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 640px; width: 100%;
+    max-height: 85vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .modal-box h2 {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.1rem;
+    color: var(--accent-2);
+  }
+  .modal-content {
+    padding: 20px 26px;
+    overflow-y: auto;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+  .modal-content h3 {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin: 16px 0 6px;
+  }
+  .modal-content h3:first-child { margin-top: 0; }
+  .modal-content p { margin-bottom: 8px; color: var(--muted); }
+
+  .modal-actions {
+    padding: 14px 26px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .btn-primary, .btn-secondary {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0d1117;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary {
+    background: var(--bg-alt);
+    color: var(--muted);
+  }
+  .btn-secondary:hover { color: var(--text); }
+
+  .tos-banner {
+    display: none;
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding: 12px 20px;
+    background: rgba(255, 123, 114, 0.1);
+    border: 1px solid rgba(255, 123, 114, 0.4);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--danger);
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .tos-banner.visible { display: flex; }
+  .tos-banner button {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+  }
+  .tos-banner button:hover { background: rgba(255, 123, 114, 0.15); }
+
+  .tos-link {
+    background: none; border: none;
+    color: var(--muted); font-size: inherit;
+    font-family: inherit; cursor: pointer; padding: 0;
+  }
+  .tos-link:hover { color: var(--accent); text-decoration: underline; }
+  /* ---------- История поиска ---------- */
+  .input-wrap { position: relative; }
+  .history-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; margin-top: 4px;
+    max-height: 260px; overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .history-dropdown.visible { display: block; }
+  .history-item {
+    padding: 10px 14px; cursor: pointer;
+    font-size: 0.9rem; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item:hover { background: var(--bg-alt); color: var(--text); }
+  .history-empty {
+    padding: 12px 14px; color: var(--muted);
+    font-size: 0.85rem; text-align: center;
+  }
+
+  /* ---------- Копирование и кэш ---------- */
+  .answer-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .answer-header h3 { margin: 0 !important; color: var(--accent-2); }
+  .btn-copy {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .btn-copy:hover { color: var(--text); border-color: var(--accent); }
+  .btn-copy.copied {
+    color: var(--accent-2);
+    border-color: var(--accent-2);
+    background: rgba(126, 231, 135, 0.1);
+  }
+
+  .cache-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; color: var(--muted);
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: var(--bg-alt);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .cache-badge button {
+    background: none; border: none;
+    color: var(--accent); cursor: pointer;
+    font-size: 0.8rem; padding: 0;
+    font-family: inherit;
+  }
+  .cache-badge button:hover { text-decoration: underline; }
+
+  /* ---------- Случайный термин ---------- */
+  .random-row { margin-top: 12px; text-align: center; }
+  .btn-random {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: all .2s;
+  }
+  .btn-random:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    border-style: solid;
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq-list {
+    max-width: 780px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .faq-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .faq-item.open { border-color: var(--accent); }
+  .faq-q {
+    padding: 16px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+    transition: color .15s;
+  }
+  .faq-q:hover { color: var(--accent); }
+  .faq-q::after {
+    content: '+';
+    font-size: 1.4rem;
+    color: var(--accent);
+    transition: transform .2s;
+    line-height: 1;
+  }
+  .faq-item.open .faq-q::after { transform: rotate(45deg); }
+  .faq-a {
+    display: none;
+    padding: 0 20px 18px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  .faq-item.open .faq-a { display: block; }
+  /* ---------- Вкладки поиска ---------- */
+  .search-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .search-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .search-tab:hover { color: var(--text); }
+  .search-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Premium Кнопка ---------- */
+  .btn-premium {
+    background: linear-gradient(135deg, #a371f7, #58a6ff);
+    color: #fff !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity .2s;
+    text-decoration: none !important;
+  }
+  .btn-premium:hover { opacity: 0.9; }
+
+  /* ---------- Модалка Iframe (Просмотр страницы) ---------- */
+  .iframe-modal {
+    position: fixed; inset: 0;
+    background: var(--bg); z-index: 2000;
+    display: none; flex-direction: column;
+  }
+  .iframe-modal.visible { display: flex; }
+  .iframe-header {
+    padding: 12px 20px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .iframe-title {
+    font-size: 0.9rem; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .iframe-content {
+    flex: 1; width: 100%; height: 100%;
+    border: none; background: #fff;
+  }
+
+  /* ---------- Подписка (Внутри модалки TOS) ---------- */
+  .sub-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .sub-price { font-size: 1.6rem; font-weight: 700; color: var(--accent-2); margin: 10px 0; }
+  .sub-price span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+  /* ---------- Pro-режим и Глоссарий ---------- */
+  .pro-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .pro-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .pro-switch input {
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+  .pro-switch.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-glossary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .2s;
+  }
+  .btn-glossary:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  /* ---------- Баннер рекламы ---------- */
+  .ad-banner {
+    display: none; /* Скрыт по умолчанию, покажем через JS */
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(28, 33, 40, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--accent);
+    padding: 12px 24px;
+    z-index: 900;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  }
+  .ad-banner.visible { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .ad-banner .btn-premium {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+  /* Отступ для body, чтобы фиксированный баннер не перекрывал футер */
+  body.has-ad-banner {
+    padding-bottom: 70px;
+    transition: padding-bottom 0.3s ease;
+  }
+
+  /* ---------- Экспорт и Источники ---------- */
+  .answer-tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sources-box {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.85rem;
+  }
+  .sources-box h4 {
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+  .sources-box ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sources-box li a {
+    color: var(--muted);
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  .sources-box li a:hover { color: var(--accent-2); }
+  /* ---------- Тарифные планы ---------- */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Жестко 3 колонки */
+    gap: 12px;
+    margin-top: 20px;
+  }
+  @media (max-width: 600px) {
+    .pricing-grid { grid-template-columns: 1fr; } /* На телефонах — в столбик */
+  }
+  .pricing-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform .2s, border-color .2s;
+  }
+  .pricing-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .pricing-card.popular { border-color: var(--accent); box-shadow: 0 0 15px rgba(88, 166, 255, 0.15); }
+  .pricing-card.popular::before {
+    content: 'ХИТ';
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #0d1117;
+    font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  }
+  .pricing-card h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text); }
+  .pricing-card .price { font-size: 1.5rem; font-weight: 700; color: var(--accent-2); margin-bottom: 16px; }
+  .pricing-card ul {
+    list-style: none; padding: 0; margin: 0 0 20px 0;
+    font-size: 0.8rem; color: var(--muted); flex-grow: 1; text-align: left;
+  }
+  .pricing-card ul li { margin-bottom: 6px; }
+  .pricing-card ul li::before { content: '✓'; color: var(--accent-2); margin-right: 6px; }
+
+  /* ---------- Футер ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+    .search-panel { padding: 20px; }
+    .hero { padding-top: 40px; }
+    .logo { font-size: 1.15rem; }
+    .logo .year-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ---------- Шапка ---------- -->
+<header>
+  <nav class="nav">
+    <div class="logo">
+      <img src="logo.png" alt="GameTranslator Logo">
+      GameTranslator<span class="dot">.</span>
+      <span class="year-badge">© 2026</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="about.html" data-i18n="nav_about">О проекте</a></li>
+      <li><a href="#features" data-i18n="nav_features">Возможности</a></li>
+      <li><a href="#examples" data-i18n="nav_examples">Примеры</a></li>
+      <li><a href="#contact" data-i18n="nav_contact">Контакты</a></li>
+    </ul>
+    <button id="premiumBtn" class="btn-premium" data-i18n="premium_btn">⭐ Premium</button>
+    <div class="lang-switcher">
+      <select id="uiLangSelect" aria-label="Interface language">
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="pl">🇵🇱 Polski</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+  </nav>
+</header>
+<!-- Баннер рекламы (только для бесплатных) -->
+<div class="ad-banner" id="adBanner">
+  <span data-i18n="ad_text">Реклама: Купите скины в CS2 со скидкой 50%!</span>
+  <button class="btn-premium" onclick="document.getElementById('subModal').classList.add('visible')" data-i18n="ad_btn">Убрать рекламу</button>
+</div>
+
+<div class="tos-banner" id="tosBanner">
+  <span data-i18n="tos_banner_text">Вы отклонили пользовательское соглашение.</span>
+  <button id="tosBannerBtn" data-i18n="tos_banner_btn">Прочитать снова</button>
+</div>
+<!-- ---------- Hero ---------- -->
+<section class="hero">
+  <h1 data-i18n="hero_title">Адаптивный перевод в играх — на всех языках</h1>
+  <p data-i18n="hero_subtitle">Мы сканируем вики, фандомы и официальные локализации, чтобы вы могли узнать, как звучит ваш любимый термин из игры в любой стране мира.</p>
+
+  <div class="search-panel">
+    <div class="search-tabs">
+      <div class="search-tab active" data-tab="term" data-i18n="tab_term">Поиск термина</div>
+      <div class="search-tab" data-tab="page">
+        <span data-i18n="tab_page">Перевод страницы</span>
+        <span id="premiumLock" style="font-size: 0.8rem;">🔒</span>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 1: ПОИСК ТЕРМИНА -->
+    <div id="tab-term" class="tab-content active">
+      <form id="searchForm" onsubmit="event.preventDefault(); searchTerm();">
+
+      <div class="search-step" id="step1">
+        <span class="step-badge">1</span>
+        <div class="step-body">
+          <label for="gameInput" data-i18n="step1_label">Игра или фандом</label>
+          <div class="input-wrap">
+            <input
+              id="gameInput"
+              type="text"
+              data-i18n-placeholder="step1_placeholder"
+              placeholder="Например: Cyberpunk 2077, The Witcher 3…"
+              autocomplete="off"
+            >
+            <div class="history-dropdown" id="historyDropdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-connector" id="connector"></div>
+
+      <div class="search-step" id="step2">
+        <span class="step-badge">2</span>
+        <div class="step-body">
+          <label for="objectInput" data-i18n="step2_label">Герой, предмет или объект</label>
+          <input
+            id="objectInput"
+            type="text"
+            data-i18n-placeholder="step2_placeholder"
+            placeholder="Например: Джонни Сильверхенд, Убежище 101…"
+            autocomplete="off"
+          >
+        </div>
+      </div>
+
+      <div class="step-connector" id="connector2"></div>
+
+      <div class="search-step" id="step3">
+        <span class="step-badge">3</span>
+        <div class="step-body">
+          <label for="subprojectInput">
+            <span data-i18n="step3_label">Подпроект</span>
+            <span class="optional-badge" data-i18n="optional_badge">необязательно</span>
+          </label>
+          <input
+            id="subprojectInput"
+            type="text"
+            data-i18n-placeholder="step3_placeholder"
+            placeholder="Сервер, плейс или режим — например, Hypixel, Doomspire…"
+            autocomplete="off"
+          >
+        </div>
+      </div>
+
+      <div class="langs-section">
+        <label data-i18n="langs_label">Перевод на языки</label>
+        <p class="langs-hint" data-i18n="langs_hint">Выберите один или несколько</p>
+        <div class="langs" id="langList">
+          <span class="lang-chip active">🇷🇺 Русский</span>
+          <span class="lang-chip active">🇬🇧 English</span>
+          <span class="lang-chip active">🇩🇪 Deutsch</span>
+          <span class="lang-chip active">🇫🇷 Français</span>
+          <span class="lang-chip active">🇯🇵 日本語</span>
+          <span class="lang-chip active">🇵🇱 Polski</span>
+          <span class="lang-chip">🇪🇸 Español</span>
+          <span class="lang-chip">🇨🇳 中文</span>
+        </div>
+      </div>
+
+      <button type="submit" class="search-btn" id="searchBtn" data-i18n="search_btn">Найти перевод</button>
+      <div class="pro-options">
+        <label class="pro-switch" id="proSwitchLabel">
+          <input type="checkbox" id="proToggle">
+          <span data-i18n="pro_mode_toggle">Pro-режим (умная модель)</span>
+        </label>
+        <button type="button" class="btn-glossary" id="openGlossaryBtn" data-i18n="glossary_btn">📖 Мой глоссарий</button>
+      </div>
+      <!-- Tone Selector -->
+      <div class="pro-options" id="toneOptions" style="margin-top: 8px; display: none; border-top: none; padding-top: 0;">
+        <label style="font-size: 0.85rem; color: var(--muted);">🎭 <span data-i18n="tone_label">Стиль перевода (ИИ)</span>:</label>
+        <select id="toneSelect" style="padding: 4px 8px; border-radius: 6px; background: var(--bg-alt); color: var(--text); border: 1px solid var(--border);">
+          <option value="default" data-i18n="tone_default">По умолчанию</option>
+          <option value="lore" data-i18n="tone_lore">Лорный / Литературный</option>
+          <option value="slang" data-i18n="tone_slang">Сленговый / Геймерский</option>
+        </select>
+      </div>
+
+      <div class="random-row">
+        <button type="button" class="btn-random" id="randomBtn" data-i18n="random_btn">🎲 Случайный термин</button>
+      </div>
+    </form>
+    </div> <!-- /tab-term -->
+
+    <!-- ВКЛАДКА 2: ПЕРЕВОД СТРАНИЦЫ -->
+    <div id="tab-page" class="tab-content">
+      <div class="search-step" style="margin-bottom: 16px;">
+        <span class="step-badge">🔗</span>
+        <div class="step-body">
+          <label for="pageUrlInput" data-i18n="page_url_label">Ссылка на страницу</label>
+          <input
+            id="pageUrlInput"
+            type="url"
+            data-i18n-placeholder="page_url_placeholder"
+            placeholder="https://ru.wikipedia.org/wiki/..."
+          >
+        </div>
+      </div>
+      <button type="button" id="translatePageBtn" class="search-btn" data-i18n="page_translate_btn">Перевести страницу</button>
+      <p style="font-size: 0.75rem; color: var(--muted); margin-top: 10px; text-align: center;" data-i18n="page_hint">
+        Доступно только с подпиской Premium
+      </p>
+    </div>
+  </div>
+
+  <div id="resultContainer" class="result-container">
+    <div id="loadingIndicator" class="loading-indicator">
+      <div class="spinner"></div>
+      <p data-i18n="loading">🧠 Нейросеть анализирует вики и интернет…</p>
+    </div>
+    <div id="answerBox" class="answer-box"></div>
+  </div>
+</section>
+
+<!-- ---------- Возможности ---------- -->
+<section id="features">
+  <div class="container">
+    <h2 class="section-title">
+      <span data-i18n="features_title">Возможности</span>
+      <span class="accent-text">GameTranslator</span>
+    </h2>
+    <div class="cards">
+      <div class="card">
+        <span class="icon">🌍</span>
+        <h3 data-i18n="feat1_title">Мультиязычные вики</h3>
+        <p data-i18n="feat1_desc">Собираем термины из википедий, фандомов и официальных сайтов более чем на 20 языках.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🔍</span>
+        <h3 data-i18n="feat2_title">Умный поиск</h3>
+        <p data-i18n="feat2_desc">Ищет совпадения даже с учётом транслитерации и адаптаций: «Сильверхенд» ↔ «Silverhand».</p>
+      </div>
+      <div class="card">
+        <span class="icon">📊</span>
+        <h3 data-i18n="feat3_title">Сравнение локализаций</h3>
+        <p data-i18n="feat3_desc">Показывает официальный перевод, адаптацию и оригинал в удобной таблице.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🧩</span>
+        <h3 data-i18n="feat4_title">Контекст и отсылки</h3>
+        <p data-i18n="feat4_desc">Поясняем культурные адаптации: каламбуры, имена, идиомы и отсылки, потерянные при переводе.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🤝</span>
+        <h3 data-i18n="feat5_title">Сообщество</h3>
+        <p data-i18n="feat5_desc">Переводчики и игроки сами дополняют базу знаний — с указанием источников и правок.</p>
+      </div>
+      <div class="card">
+        <span class="icon">⚡</span>
+        <h3 data-i18n="feat6_title">Быстрый API</h3>
+        <p data-i18n="feat6_desc">Для разработчиков — открытое API, чтобы подтягивать термины прямо в свои проекты.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🗣️</span>
+        <h3 data-i18n="feat7_title">Единый язык сообщества</h3>
+        <p data-i18n="feat7_desc">Помогаем игрокам из разных стран говорить об одних и тех же терминах — без путаницы и споров о переводе.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Примеры ---------- -->
+<section id="examples" style="background: var(--bg-alt);">
+  <div class="container">
+    <h2 class="section-title">
+      <span data-i18n="examples_title_a">Примеры</span>
+      <span class="accent-text" data-i18n="examples_title_b">адаптаций</span>
+    </h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Оригинал</th>
+            <th>🇷🇺 Русский</th>
+            <th>🇵🇱 Polski</th>
+            <th>🇯🇵 日本語</th>
+            <th>🇩🇪 Deutsch</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Johnny Silverhand</td>
+            <td>Джонни Сильверхенд</td>
+            <td>Johnny Silverhand</td>
+            <td>ジョニー・シルヴァーハンド</td>
+            <td>Johnny Silverhand</td>
+          </tr>
+          <tr>
+            <td>Vault 101</td>
+            <td>Убежище 101</td>
+            <td>Krypta 101</td>
+            <td>ヴォールト101</td>
+            <td>Vault 101</td>
+          </tr>
+          <tr>
+            <td>Geralt of Rivia</td>
+            <td>Геральт из Ривии</td>
+            <td>Geralt z Rivii</td>
+            <td>リヴィアのゲラルト</td>
+            <td>Geralt von Riva</td>
+          </tr>
+          <tr>
+            <td>Dragonrend</td>
+            <td>Драконье Пламя</td>
+            <td>Smoczy Krzyk</td>
+            <td>ドラゴンレンド</td>
+            <td>Drachenschrei</td>
+          </tr>
+          <tr>
+            <td>Big Daddy</td>
+            <td>Большой Папочка</td>
+            <td>Wielki Tata</td>
+            <td>ビッグダディ</td>
+            <td>Big Daddy</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<!-- ---------- FAQ ---------- -->
+<section id="faq">
+  <div class="container">
+    <h2 class="section-title">
+      <span data-i18n="faq_title">Частые вопросы</span>
+    </h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q1">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a1">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q2">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a2">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q3">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a3">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q4">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a4">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q5">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a5">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q6">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a6">Ответ</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" data-i18n="faq_q7">Вопрос</div>
+        <div class="faq-a" data-i18n="faq_a7">Ответ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Футер ---------- -->
+<footer id="contact">
+  <p data-i18n="footer_text">© 2026 GameTranslator — проект об адаптивном переводе в играх.</p>
+  <p style="margin-top: 8px;">
+    <span data-i18n="footer_contact">Связаться:</span>
+    <a href="mailto:hello@gametranslator.example">hello@gametranslator.example</a>
+    &nbsp;•&nbsp;
+    <a href="https://github.com/Leonid4D/GameTranslator" target="_blank">GitHub</a>
+    &nbsp;•&nbsp;
+    <button class="tos-link" id="tosOpenLink" data-i18n="tos_title">Пользовательское соглашение</button>
+  </p>
+</footer>
+
+<!-- Модальное окно пользовательского соглашения -->
+<div class="modal-overlay" id="tosModal">
+  <div class="modal-box">
+    <h2 data-i18n="tos_title">Пользовательское соглашение</h2>
+    <div class="modal-content">
+      <div data-tos-lang="ru">
+        <h3>1. Политическая независимость</h3>
+        <p>GameTranslator — независимый проект. Мы не поддерживаем и не представляем интересы какого-либо государства, политической силы или военного блока.</p>
+        <h3>2. Без санкций и ограничений</h3>
+        <p>Сервис не применяет санкций, ограничений или блокировок по отношению к какой-либо стране, региону, языку или сообществу. Доступ к переводам предоставляется всем пользователям без географических или политических исключений.</p>
+        <h3>3. Без цензуры</h3>
+        <p>Мы не цензурируем материалы, которые переводятся. Термины, имена, отсылки и контент игр обрабатываются как есть — без идеологических правок и изъятий.</p>
+        <h3>4. Точность перевода</h3>
+        <p>Переводы генерируются нейросетями и могут содержать ошибки. Сервис предоставляется «как есть»; рекомендуем сверяться с официальной локализацией.</p>
+      </div>
+      <div data-tos-lang="en">
+        <h3>1. Political independence</h3>
+        <p>GameTranslator is an independent project. We do not support or represent the interests of any state, political force or military bloc.</p>
+        <h3>2. No sanctions or restrictions</h3>
+        <p>The service applies no sanctions, restrictions or blocks to any country, region, language or community. Access to translations is provided to all users without geographic or political exceptions.</p>
+        <h3>3. No censorship</h3>
+        <p>We do not censor the material that is translated. Game terms, names, references and content are processed as-is, without ideological edits or omissions.</p>
+        <h3>4. Accuracy</h3>
+        <p>Translations are generated by AI and may contain errors. The service is provided "as is"; we recommend verifying against official localization.</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button id="tosDecline" class="btn-secondary" data-i18n="tos_decline">Отклонить</button>
+      <button id="tosAccept" class="btn-primary" data-i18n="tos_accept">Принять</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно Глоссария -->
+<div class="modal-overlay" id="glossaryModal">
+  <div class="modal-box" style="max-width: 500px;">
+    <h2 data-i18n="glossary_title">📖 Личный глоссарий</h2>
+    <div class="modal-content">
+      <p data-i18n="glossary_desc" style="margin-bottom: 16px;">Нейросеть будет использовать ваши переводы в приоритетном порядке.</p>
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <input type="text" id="glossaryFrom" placeholder="Оригинал (напр. Silverhand)" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg-alt); color:var(--text);">
+        <input type="text" id="glossaryTo" placeholder="Перевод (напр. Сильверхенд)" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg-alt); color:var(--text);">
+      </div>
+      <button class="btn-primary" id="saveGlossaryBtn" style="width: 100%; margin-bottom: 20px;" data-i18n="glossary_save">Добавить в словарь</button>
+      <ul id="glossaryList" style="list-style: none; padding: 0; font-size: 0.9rem; margin-bottom: 20px;"></ul>
+      
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" id="exportGlossaryBtn" style="flex: 1; font-size: 0.8rem;" data-i18n="glossary_export">📥 Экспорт (JSON)</button>
+        <button class="btn-secondary" id="importGlossaryBtn" style="flex: 1; font-size: 0.8rem;" data-i18n="glossary_import">📤 Импорт (JSON)</button>
+        <input type="file" id="glossaryFile" accept=".json" style="display: none;">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('glossaryModal').classList.remove('visible')" data-i18n="sub_close_btn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно Подписки (Тарифы) -->
+<div class="modal-overlay" id="subModal">
+  <div class="modal-box" style="max-width: 720px;">
+    <h2 style="justify-content: center; border-bottom: none; padding-bottom: 0;" data-i18n="sub_title">⭐ GameTranslator Premium</h2>
+    <div class="modal-content">
+      <p style="text-align: center;" data-i18n="sub_desc">Поддержите проект и получите доступ к эксклюзивным функциям.</p>
+      
+      <div class="pricing-grid">
+        <!-- Tarif 1 -->
+        <div class="pricing-card">
+          <h3>Premium</h3>
+          <div class="price">349 ₽</div>
+          <ul>
+            <li data-i18n="premium_feat_3">Без рекламы</li>
+            <li data-i18n="premium_feat_2">Pro-режим</li>
+            <li data-i18n="premium_feat_4">Глоссарий</li>
+            <li data-i18n="premium_feat_5">Экспорт и источники</li>
+          </ul>
+          <button class="btn-primary buy-btn" data-tier="1" data-i18n="sub_pay_btn">Оформить</button>
+        </div>
+        <!-- Tarif 2 -->
+        <div class="pricing-card popular">
+          <h3>Premium+</h3>
+          <div class="price">699 ₽</div>
+          <ul>
+            <li><strong>Всё из Premium</strong></li>
+            <li data-i18n="premium_plus_feat">Перевод страниц (50/мес)</li>
+            <li data-i18n="premium_plus_glossary">Импорт/Экспорт словаря</li>
+            <li data-i18n="premium_feat_4">Приоритетная очередь</li>
+          </ul>
+          <button class="btn-primary buy-btn" data-tier="2" data-i18n="sub_pay_btn">Оформить</button>
+        </div>
+        <!-- Tarif 3 -->
+        <div class="pricing-card">
+          <h3>Premium++</h3>
+          <div class="price">1290 ₽</div>
+          <ul>
+            <li><strong>Всё из Premium+</strong></li>
+            <li data-i18n="premium_plus_plus_feat">Безлимитный перевод</li>
+            <li data-i18n="premium_plus_tone">ИИ-Тональность (сленг, лор)</li>
+            <li data-i18n="premium_plus_bulk">Массовый перевод</li>
+          </ul>
+          <button class="btn-primary buy-btn" data-tier="3" data-i18n="sub_pay_btn">Оформить</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content: center; border-top: none;">
+      <button id="subCloseBtn" class="btn-secondary" data-i18n="sub_close_btn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- Iframe для просмотра переведенной страницы (ТЕПЕРЬ ПЕРЕД СКРИПТОМ) -->
+<div class="iframe-modal" id="iframeModal">
+  <div class="iframe-header">
+    <div class="iframe-title" id="iframeTitle">Перевод страницы...</div>
+    <button id="iframeCloseBtn" class="btn-secondary">Закрыть ✕</button>
+  </div>
+  <iframe id="translatedFrame" class="iframe-content" src="about:blank"></iframe>
+</div>
+<!-- Модальное окно статуса Premium -->
+<div class="modal-overlay" id="premiumStatusModal">
+  <div class="modal-box" style="max-width: 420px;">
+    <h2 id="statusTitle" style="color: var(--accent-2);">⭐ Premium активен</h2>
+    <div class="modal-content">
+      <p id="statusDesc" style="margin-bottom: 16px;">Спасибо за поддержку! Ваши функции:</p>
+      <ul id="statusFeatures" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem;"></ul>
+    </div>
+    <div class="modal-actions" style="justify-content: space-between;">
+      <button class="btn-secondary" id="cancelSubBtn" style="color: var(--danger); border-color: rgba(255,123,114,0.3);" data-i18n="premium_cancel">Отменить</button>
+      <button class="btn-primary" id="premiumStatusCloseBtn" data-i18n="sub_close_btn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   СЛОВАРИ ПЕРЕВОДОВ ИНТЕРФЕЙСА
+   ========================================================= */
+const translations = {
+  ru: {
+    nav_about: "О проекте", nav_features: "Возможности", nav_examples: "Примеры", nav_contact: "Контакты",
+    hero_title: "Адаптивный перевод в играх — на всех языках",
+    hero_subtitle: "Мы сканируем вики, фандомы и официальные локализации, чтобы вы могли узнать, как звучит ваш любимый термин из игры в любой стране мира.",
+    step1_label: "Игра или фандом",
+    step1_placeholder: "Например: Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Герой, предмет или объект",
+    step2_placeholder: "Например: Джонни Сильверхенд, Убежище 101…",
+    search_btn: "Найти перевод",
+    searching_btn: "Поиск…",
+    loading: "🧠 Нейросеть анализирует вики и интернет…",
+    result_title: "Результат для «{obj}»",
+    features_title: "Возможности",
+    feat1_title: "Мультиязычные вики",
+    feat1_desc: "Собираем термины из википедий, фандомов и официальных сайтов более чем на 20 языках.",
+    feat2_title: "Умный поиск",
+    feat2_desc: "Ищет совпадения даже с учётом транслитерации и адаптаций: «Сильверхенд» ↔ «Silverhand».",
+    feat3_title: "Сравнение локализаций",
+    feat3_desc: "Показывает официальный перевод, адаптацию и оригинал в удобной таблице.",
+    feat4_title: "Контекст и отсылки",
+    feat4_desc: "Поясняем культурные адаптации: каламбуры, имена, идиомы и отсылки, потерянные при переводе.",
+    feat5_title: "Сообщество",
+    feat5_desc: "Переводчики и игроки сами дополняют базу знаний — с указанием источников и правок.",
+    feat6_title: "Быстрый API",
+    feat6_desc: "Для разработчиков — открытое API, чтобы подтягивать термины прямо в свои проекты.",
+    feat7_title: "Единый язык сообщества",
+    feat7_desc: "Помогаем игрокам из разных стран говорить об одних и тех же терминах — без путаницы и споров о переводе.",
+    examples_title_a: "Примеры",
+    examples_title_b: "адаптаций",
+    footer_text: "© 2026 GameTranslator — проект об адаптивном переводе в играх.",
+    footer_contact: "Связаться:",
+    error_generic: "Ошибка сервера",
+    error_connection: "Не удалось связаться с сервером.",
+    step3_label: "Подпроект",
+    step3_placeholder: "Сервер, плейс или режим — например, Hypixel, Doomspire…",
+    optional_badge: "необязательно",
+    langs_label: "Перевод на языки",
+    langs_hint: "Выберите один или несколько",
+    tos_title: "Пользовательское соглашение",
+    tos_accept: "Принять",
+    tos_decline: "Отклонить",
+    tos_banner_text: "Вы отклонили пользовательское соглашение. Полноценные функции проекта могут быть ограничены.",
+    tos_banner_btn: "Прочитать снова",
+    history_empty: "История пуста",
+    copy_btn: "Копировать",
+    copied_btn: "Скопировано!",
+    cache_from: "Из кэша · {time} назад",
+    cache_refresh: "Обновить",
+    time_sec: "сек", time_min: "мин", time_hour: "ч", time_day: "д",
+    random_btn: "🎲 Случайный термин",
+    faq_title: "Частые вопросы",
+    faq_q1: "Откуда берутся переводы?",
+    faq_a1: "Мы сканируем фандомные вики (Fandom, wiki.gg), официальные сайты и открытый интернет, а найденное передаём нейросети, которая составляет ответ на основе источников.",
+    faq_q2: "Почему некоторые термины не находятся?",
+    faq_a2: "Если термин не упомянут в открытых источниках ни на одном языке, нейросеть не сможет его найти. Попробуйте указать подпроект (сервер, плейс) или альтернативное название.",
+    faq_q3: "Насколько точны переводы?",
+    faq_a3: "Это ответы нейросети на основе реальных источников — ориентир, а не гарантия. Для официальной информации сверяйтесь с локализацией самой игры.",
+    faq_q4: "Зачем нужно поле «Подпроект»?",
+    faq_a4: "В Roblox, Minecraft и других играх с серверами и плейсами одно название может означать разные вещи. Подпроект помогает сузить поиск до нужного контекста.",
+    faq_q5: "Можно ли сохранить результат?",
+    faq_a5: "Да — кнопка «Копировать» сохранит ответ в буфер обмена, а ссылка из адресной строки браузера откроет тот же запрос.",
+    faq_q6: "Почему нет перевода на мой язык?",
+    faq_a6: "Мы ищем на всех языках, где есть источник. Если игра не имеет официальной локализации на вашем языке, перевода может не быть — но иногда сообщества всё равно придумывают свои названия.",
+    faq_q7: "Кто управляет проектом?",
+    faq_a7: "Это независимый проект. Наши принципы — политическая независимость, отсутствие санкций и отсутствие цензуры. Подробности — на странице «О проекте».",
+    premium_btn: "⭐ Premium",
+    tab_term: "Поиск термина",
+    tab_page: "Перевод страницы",
+    page_url_label: "Ссылка на страницу",
+    page_url_placeholder: "https://ru.wikipedia.org/wiki/...",
+    page_translate_btn: "Перевести страницу",
+    page_hint: "Доступно только с подпиской Premium",
+    sub_title: "⭐ GameTranslator Premium",
+    sub_desc: "Поддержите проект и получите доступ к эксклюзивным функциям.",
+    sub_feat1: "✅ Перевод целых страниц по ссылке",
+    sub_feat2: "✅ Без лишней воды и ограничений",
+    sub_feat3: "✅ Приоритетная очередь запросов",
+    sub_period: "/ месяц",
+    sub_pay_btn: "Оформить подписку",
+    sub_close_btn: "Закрыть",
+    sub_success: "Подписка оформлена! (Демо-режим)",
+    sub_active: "⭐ Premium активен",
+    pro_mode_toggle: "Pro-режим (умная модель)",
+    pro_only_premium: "Pro-режим доступен только с Premium",
+    ad_text: "Реклама: Играйте в лучшие игры со скидками!",
+    ad_btn: "Убрать рекламу",
+    export_csv: "Excel (CSV)",
+    export_txt: "Текст (TXT)",
+    sources_title: "Источники (Pro):",
+    glossary_btn: "📖 Мой глоссарий",
+    glossary_title: "📖 Личный глоссарий",
+    glossary_desc: "Нейросеть будет использовать ваши переводы в приоритетном порядке.",
+    glossary_save: "Добавить в словарь",
+    glossary_empty: "Глоссарий пуст",
+    premium_modal_title: "⭐ Premium активен",
+    premium_modal_desc: "Спасибо за поддержку проекта! Вам доступны все эксклюзивные функции:",
+    premium_feat_1: "Перевод целых страниц по ссылке",
+    premium_feat_2: "Pro-режим (умная нейросеть)",
+    premium_feat_3: "Чистый интерфейс (без рекламы)",
+    premium_feat_4: "Личный глоссарий и приоритет",
+    premium_feat_5: "Экспорт в Excel и TXT + Источники",
+    premium_cancel: "Отменить",
+    premium_plus_feat: "Перевод страниц (50/мес)",
+    premium_plus_plus_feat: "Безлимитный перевод",
+    premium_plus_plus_feat2: "Ранний доступ к новинкам",
+    status_active: "активен",
+    status_desc: "Спасибо за поддержку! Ваши функции:",
+    premium_plus_glossary: "Импорт/Экспорт словаря",
+    premium_plus_tone: "ИИ-Тональность (сленг, лор)",
+    premium_plus_bulk: "Массовый перевод",
+    tone_label: "Стиль перевода (ИИ)",
+    tone_default: "По умолчанию",
+    tone_lore: "Лорный / Литературный",
+    tone_slang: "Сленговый / Геймерский",
+    glossary_export: "📥 Экспорт (JSON)",
+    glossary_import: "📤 Импорт (JSON)",
+    glossary_import_success: "Глоссарий успешно импортирован!"
+  },
+  en: {
+    nav_about: "About", nav_features: "Features", nav_examples: "Examples", nav_contact: "Contact",
+    hero_title: "Adaptive game translation — in every language",
+    hero_subtitle: "We scan wikis, fan sites and official localizations so you can find out how your favorite in-game term sounds anywhere in the world.",
+    step1_label: "Game or franchise",
+    step1_placeholder: "e.g. Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Character, item or object",
+    step2_placeholder: "e.g. Johnny Silverhand, Vault 101…",
+    search_btn: "Find translation",
+    searching_btn: "Searching…",
+    loading: "🧠 The AI is scanning wikis and the web…",
+    result_title: "Result for “{obj}”",
+    features_title: "Features",
+    feat1_title: "Multilingual wikis",
+    feat1_desc: "We collect terms from wikis, fandoms and official sites in 20+ languages.",
+    feat2_title: "Smart search",
+    feat2_desc: "Finds matches even across transliteration and adaptations: “Сильверхенд” ↔ “Silverhand”.",
+    feat3_title: "Localization comparison",
+    feat3_desc: "Shows official translation, adaptation and original in a clean table.",
+    feat4_title: "Context & references",
+    feat4_desc: "Explains cultural adaptations — puns, names, idioms and references lost in translation.",
+    feat5_title: "Community",
+    feat5_desc: "Translators and players enrich the knowledge base — with sources and edits.",
+    feat6_title: "Fast API",
+    feat6_desc: "For developers — an open API to pull terms into your own projects.",
+    feat7_title: "One community language",
+    feat7_desc: "Helps players from different countries talk about the same in-game terms — no confusion, no translation disputes.",
+    examples_title_a: "Localization",
+    examples_title_b: "examples",
+    footer_text: "© 2026 GameTranslator — a project about adaptive game translation.",
+    footer_contact: "Contact:",
+    error_generic: "Server error",
+    error_connection: "Could not reach the server.",
+    step3_label: "Subproject",
+    step3_placeholder: "Server, place or mode — e.g. Hypixel, Doomspire…",
+    optional_badge: "optional",
+    langs_label: "Translate to languages",
+    langs_hint: "Select one or more",
+    tos_title: "Terms of Service",
+    tos_accept: "Accept",
+    tos_decline: "Decline",
+    tos_banner_text: "You have declined the Terms of Service. Full project features may be limited.",
+    tos_banner_btn: "Read again",
+    history_empty: "History is empty",
+    copy_btn: "Copy",
+    copied_btn: "Copied!",
+    cache_from: "From cache · {time} ago",
+    cache_refresh: "Refresh",
+    time_sec: "s", time_min: "min", time_hour: "h", time_day: "d",
+    random_btn: "🎲 Random term",
+    faq_title: "FAQ",
+    faq_q1: "Where do translations come from?",
+    faq_a1: "We scan fandom wikis (Fandom, wiki.gg), official sites and the open web, then pass the findings to an AI that builds the answer based on sources.",
+    faq_q2: "Why can't I find some terms?",
+    faq_a2: "If a term isn't mentioned in open sources in any language, the AI can't find it. Try specifying a subproject (server, place) or an alternative name.",
+    faq_q3: "How accurate are the translations?",
+    faq_a3: "They're AI answers based on real sources — a guide, not a guarantee. Always check the official in-game localization for authoritative info.",
+    faq_q4: "What is the 'Subproject' field for?",
+    faq_a4: "In Roblox, Minecraft and other games with servers and places, one name can mean different things. The subproject narrows the search to the right context.",
+    faq_q5: "Can I save the result?",
+    faq_a5: "Yes — the Copy button saves the answer to your clipboard, and the URL in the address bar re-opens the same query.",
+    faq_q6: "Why isn't there a translation to my language?",
+    faq_a6: "We search all languages with sources. If the game has no official localization in your language, there may be no translation — though communities sometimes invent their own names.",
+    faq_q7: "Who runs the project?",
+    faq_a7: "It's an independent project. Our principles are political independence, no sanctions and no censorship. Details are on the About page.",
+    premium_btn: "⭐ Premium",
+    tab_term: "Term Search",
+    tab_page: "Translate Page",
+    page_url_label: "Page URL",
+    page_url_placeholder: "https://en.wikipedia.org/wiki/...",
+    page_translate_btn: "Translate Page",
+    page_hint: "Available only with Premium subscription",
+    sub_title: "⭐ GameTranslator Premium",
+    sub_desc: "Support the project and unlock exclusive features.",
+    sub_feat1: "✅ Translate entire pages by link",
+    sub_feat2: "✅ No limits or wait times",
+    sub_feat3: "✅ Priority request queue",
+    sub_period: "/ month",
+    sub_pay_btn: "Subscribe Now",
+    sub_close_btn: "Close",
+    sub_success: "Subscription active! (Demo mode)",
+    sub_active: "⭐ Premium Active",
+    pro_mode_toggle: "Pro mode (smart model)",
+    pro_only_premium: "Pro mode is available only with Premium",
+    ad_text: "Ad: Play the best games with discounts!",
+    ad_btn: "Remove ads",
+    export_csv: "Excel (CSV)",
+    export_txt: "Text (TXT)",
+    sources_title: "Sources (Pro):",
+    glossary_btn: "📖 My Glossary",
+    glossary_title: "📖 Personal Glossary",
+    glossary_desc: "The AI will prioritize your translations.",
+    glossary_save: "Add to glossary",
+    glossary_empty: "Glossary is empty",
+    premium_modal_title: "⭐ Premium Active",
+    premium_modal_desc: "Thank you for supporting the project! You have access to all exclusive features:",
+    premium_feat_1: "Translate entire pages by link",
+    premium_feat_2: "Pro mode (smart neural network)",
+    premium_feat_3: "Clean interface (no ads)",
+    premium_feat_4: "Personal glossary and priority",
+    premium_feat_5: "Export to Excel and TXT + Sources",
+    premium_cancel: "Cancel",
+    premium_plus_feat: "Page translation (50/mo)",
+    premium_plus_plus_feat: "Unlimited translation",
+    premium_plus_plus_feat2: "Early access",
+    status_active: "active",
+    status_desc: "Thank you for support! Your features:",
+    premium_plus_glossary: "Glossary import/export",
+    premium_plus_tone: "AI Tone (slang, lore)",
+    premium_plus_bulk: "Bulk translation",
+    tone_label: "AI Translation Tone",
+    tone_default: "Default",
+    tone_lore: "Lore / Literary",
+    tone_slang: "Slang / Gamer",
+    glossary_export: "📥 Export (JSON)",
+    glossary_import: "📤 Import (JSON)",
+    glossary_import_success: "Glossary imported successfully!"
+  },
+  es: {
+    nav_about: "Acerca de", nav_features: "Funciones", nav_examples: "Ejemplos", nav_contact: "Contacto",
+    hero_title: "Traducción adaptativa en videojuegos — en todos los idiomas",
+    hero_subtitle: "Escaneamos wikis, fansites y localizaciones oficiales para que descubras cómo suena tu término favorito del juego en cualquier país del mundo.",
+    step1_label: "Juego o franquicia",
+    step1_placeholder: "Ej.: Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Personaje, objeto o término",
+    step2_placeholder: "Ej.: Johnny Silverhand, Refugio 101…",
+    search_btn: "Buscar traducción",
+    searching_btn: "Buscando…",
+    loading: "🧠 La IA está escaneando wikis e internet…",
+    result_title: "Resultado para «{obj}»",
+    features_title: "Funciones",
+    feat1_title: "Wikis multilingües",
+    feat1_desc: "Recopilamos términos de wikis, fandoms y sitios oficiales en más de 20 idiomas.",
+    feat2_title: "Búsqueda inteligente",
+    feat2_desc: "Encuentra coincidencias incluso con transliteración y adaptaciones: «Сильверхенд» ↔ «Silverhand».",
+    feat3_title: "Comparación de localizaciones",
+    feat3_desc: "Muestra la traducción oficial, la adaptación y el original en una tabla clara.",
+    feat4_title: "Contexto y referencias",
+    feat4_desc: "Explicamos las adaptaciones culturales: juegos de palabras, nombres, modismos y referencias que se pierden al traducir.",
+    feat5_title: "Comunidad",
+    feat5_desc: "Traductores y jugadores enriquecen la base de conocimiento — con fuentes y correcciones.",
+    feat6_title: "API rápida",
+    feat6_desc: "Para desarrolladores — una API abierta para integrar términos en tus proyectos.",
+    examples_title_a: "Ejemplos de",
+    examples_title_b: "adaptación",
+    footer_text: "© 2026 GameTranslator — un proyecto sobre traducción adaptativa en videojuegos.",
+    footer_contact: "Contacto:",
+    error_generic: "Error del servidor",
+    error_connection: "No se pudo conectar con el servidor.",
+    feat7_title: "Un solo idioma comunitario",
+    feat7_desc: "Ayuda a jugadores de diferentes países a hablar de los mismos términos del juego, sin confusión ni disputas de traducción."
+  },
+  pt: {
+    nav_about: "Sobre", nav_features: "Recursos", nav_examples: "Exemplos", nav_contact: "Contato",
+    hero_title: "Tradução adaptativa em jogos — em todos os idiomas",
+    hero_subtitle: "Escaneamos wikis, fã-sites e localizações oficiais para você descobrir como o seu termo favorito do jogo soa em qualquer país do mundo.",
+    step1_label: "Jogo ou franquia",
+    step1_placeholder: "Ex.: Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Personagem, item ou objeto",
+    step2_placeholder: "Ex.: Johnny Silverhand, Refúgio 101…",
+    search_btn: "Buscar tradução",
+    searching_btn: "Buscando…",
+    loading: "🧠 A IA está escaneando wikis e a internet…",
+    result_title: "Resultado para “{obj}”",
+    features_title: "Recursos",
+    feat1_title: "Wikis multilíngues",
+    feat1_desc: "Coletamos termos de wikis, fandoms e sites oficiais em mais de 20 idiomas.",
+    feat2_title: "Busca inteligente",
+    feat2_desc: "Encontra correspondências mesmo com transliteração e adaptações: “Сильверхенд” ↔ “Silverhand”.",
+    feat3_title: "Comparação de localizações",
+    feat3_desc: "Mostra a tradução oficial, a adaptação e o original em uma tabela clara.",
+    feat4_title: "Contexto e referências",
+    feat4_desc: "Explicamos adaptações culturais: trocadilhos, nomes, expressões e referências perdidas na tradução.",
+    feat5_title: "Comunidade",
+    feat5_desc: "Tradutores e jogadores enriquecem a base de conhecimento — com fontes e correções.",
+    feat6_title: "API rápida",
+    feat6_desc: "Para desenvolvedores — uma API aberta para integrar termos aos seus projetos.",
+    examples_title_a: "Exemplos de",
+    examples_title_b: "adaptação",
+    footer_text: "© 2026 GameTranslator — um projeto sobre tradução adaptativa em jogos.",
+    footer_contact: "Contato:",
+    error_generic: "Erro do servidor",
+    error_connection: "Não foi possível conectar ao servidor.",
+    feat7_title: "Uma linguagem comunitária",
+    feat7_desc: "Ajuda jogadores de diferentes países a falar sobre os mesmos termos do jogo — sem confusão, sem disputas de tradução."
+  },
+  zh: {
+    nav_about: "关于", nav_features: "功能", nav_examples: "示例", nav_contact: "联系",
+    hero_title: "游戏自适应翻译 — 覆盖所有语言",
+    hero_subtitle: "我们扫描维基、粉丝网站和官方本地化，让您了解最喜欢的游戏术语在世界上任何国家/地区的说法。",
+    step1_label: "游戏或系列",
+    step1_placeholder: "例如：Cyberpunk 2077、The Witcher 3…",
+    step2_label: "角色、物品或对象",
+    step2_placeholder: "例如：强尼·银手、101号避难所…",
+    search_btn: "查找翻译",
+    searching_btn: "搜索中…",
+    loading: "🧠 AI 正在扫描维基和互联网…",
+    result_title: "“{obj}” 的结果",
+    features_title: "功能",
+    feat1_title: "多语言维基",
+    feat1_desc: "我们从维基、粉丝社区和官方网站收集 20 多种语言的术语。",
+    feat2_title: "智能搜索",
+    feat2_desc: "即使经过音译和改编也能找到匹配：“Сильверхенд” ↔ “Silverhand”。",
+    feat3_title: "本地化对比",
+    feat3_desc: "以清晰的表格展示官方翻译、改编和原文。",
+    feat4_title: "语境与引用",
+    feat4_desc: "解释文化改编：双关语、名称、习语以及翻译中丢失的引用。",
+    feat5_title: "社区",
+    feat5_desc: "译者和玩家共同丰富知识库 — 附来源和修订。",
+    feat6_title: "快速 API",
+    feat6_desc: "为开发者提供开放 API，可将术语直接接入您的项目。",
+    examples_title_a: "本地化",
+    examples_title_b: "示例",
+    footer_text: "© 2026 GameTranslator — 一个关于游戏自适应翻译的项目。",
+    footer_contact: "联系：",
+    error_generic: "服务器错误",
+    error_connection: "无法连接到服务器。",
+    feat7_title: "统一的社区语言",
+    feat7_desc: "帮助来自不同国家的玩家用相同的游戏术语交流——没有混淆，没有翻译争议。"
+  },
+  ja: {
+    nav_about: "概要", nav_features: "機能", nav_examples: "例", nav_contact: "お問い合わせ",
+    hero_title: "ゲームの適応翻訳 — あらゆる言語で",
+    hero_subtitle: "ウィキ、ファンサイト、公式ローカライズをスキャンし、お気に入りのゲーム用語が世界中でどう呼ばれているかを調べます。",
+    step1_label: "ゲームまたはシリーズ",
+    step1_placeholder: "例：Cyberpunk 2077、The Witcher 3…",
+    step2_label: "キャラクター、アイテム、オブジェクト",
+    step2_placeholder: "例：ジョニー・シルヴァーハンド、ヴォールト101…",
+    search_btn: "翻訳を検索",
+    searching_btn: "検索中…",
+    loading: "🧠 AI がウィキとインターネットをスキャンしています…",
+    result_title: "「{obj}」の結果",
+    features_title: "機能",
+    feat1_title: "多言語ウィキ",
+    feat1_desc: "20 以上の言語でウィキ、ファンダム、公式サイトから用語を収集します。",
+    feat2_title: "スマート検索",
+    feat2_desc: "音訳や適応を考慮しても一致を見つけます：「Сильверхенд」↔「Silverhand」。",
+    feat3_title: "ローカライズ比較",
+    feat3_desc: "公式翻訳、適応、原文を見やすい表で表示します。",
+    feat4_title: "文脈と引用",
+    feat4_desc: "文化的適応を解説：駄洒落、名前、慣用句、翻訳で失われる引用。",
+    feat5_title: "コミュニティ",
+    feat5_desc: "翻訳者とプレイヤーが知識ベースを充実させます — 出典と編集付き。",
+    feat6_title: "高速 API",
+    feat6_desc: "開発者向け — 用語をあなたのプロジェクトに取り込めるオープン API。",
+    examples_title_a: "ローカライズ",
+    examples_title_b: "の例",
+    footer_text: "© 2026 GameTranslator — ゲームの適応翻訳に関するプロジェクト。",
+    footer_contact: "お問い合わせ：",
+    error_generic: "サーバーエラー",
+    error_connection: "サーバーに接続できませんでした。",
+    feat7_title: "コミュニティ共通の言語",
+    feat7_desc: "異なる国のプレイヤーが同じゲーム用語で話せるようにします — 混乱も翻訳の争いもありません。"
+  },
+  de: {
+    nav_about: "Über", nav_features: "Funktionen", nav_examples: "Beispiele", nav_contact: "Kontakt",
+    hero_title: "Adaptive Spielübersetzung — in jeder Sprache",
+    hero_subtitle: "Wir durchsuchen Wikis, Fanseiten und offizielle Lokalisierungen, damit Sie erfahren, wie Ihr Lieblingsbegriff aus dem Spiel in jedem Land der Welt klingt.",
+    step1_label: "Spiel oder Franchise",
+    step1_placeholder: "z. B. Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Charakter, Gegenstand oder Objekt",
+    step2_placeholder: "z. B. Johnny Silverhand, Vault 101…",
+    search_btn: "Übersetzung finden",
+    searching_btn: "Suche läuft…",
+    loading: "🧠 Die KI durchsucht Wikis und das Internet…",
+    result_title: "Ergebnis für „{obj}“",
+    features_title: "Funktionen",
+    feat1_title: "Mehrsprachige Wikis",
+    feat1_desc: "Wir sammeln Begriffe aus Wikis, Fandoms und offiziellen Seiten in über 20 Sprachen.",
+    feat2_title: "Intelligente Suche",
+    feat2_desc: "Findet Treffer auch bei Transliteration und Adaptionen: „Сильверхенд“ ↔ „Silverhand“.",
+    feat3_title: "Lokalisierungsvergleich",
+    feat3_desc: "Zeigt offizielle Übersetzung, Adaption und Original in einer übersichtlichen Tabelle.",
+    feat4_title: "Kontext & Referenzen",
+    feat4_desc: "Erklärt kulturelle Adaptionen: Wortspiele, Namen, Redewendungen und Anspielungen, die bei der Übersetzung verloren gehen.",
+    feat5_title: "Community",
+    feat5_desc: "Übersetzer und Spieler erweitern die Wissensbasis — mit Quellen und Korrekturen.",
+    feat6_title: "Schnelle API",
+    feat6_desc: "Für Entwickler — eine offene API, um Begriffe in eigene Projekte einzubinden.",
+    examples_title_a: "Lokalisierungs",
+    examples_title_b: "beispiele",
+    footer_text: "© 2026 GameTranslator — ein Projekt zur adaptiven Spielübersetzung.",
+    footer_contact: "Kontakt:",
+    error_generic: "Serverfehler",
+    error_connection: "Server konnte nicht erreicht werden.",
+    feat7_title: "Eine Community-Sprache",
+    feat7_desc: "Hilft Spielern aus verschiedenen Ländern, über dieselben Spielbegriffe zu sprechen — keine Verwirrung, keine Übersetzungsstreitigkeiten."
+  },
+  fr: {
+    nav_about: "À propos", nav_features: "Fonctionnalités", nav_examples: "Exemples", nav_contact: "Contact",
+    hero_title: "Traduction adaptative dans les jeux — dans toutes les langues",
+    hero_subtitle: "Nous scannons les wikis, fansites et localisations officielles pour que vous découvriez comment votre terme préféré du jeu se dit dans n'importe quel pays du monde.",
+    step1_label: "Jeu ou franchise",
+    step1_placeholder: "ex. Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Personnage, objet ou terme",
+    step2_placeholder: "ex. Johnny Silverhand, Abri 101…",
+    search_btn: "Chercher la traduction",
+    searching_btn: "Recherche…",
+    loading: "🧠 L'IA analyse les wikis et Internet…",
+    result_title: "Résultat pour « {obj} »",
+    features_title: "Fonctionnalités",
+    feat1_title: "Wikis multilingues",
+    feat1_desc: "Nous collectons des termes depuis les wikis, fandoms et sites officiels dans plus de 20 langues.",
+    feat2_title: "Recherche intelligente",
+    feat2_desc: "Trouve des correspondances même avec translittération et adaptations : « Сильверхенд » ↔ « Silverhand ».",
+    feat3_title: "Comparaison de localisations",
+    feat3_desc: "Affiche la traduction officielle, l'adaptation et l'original dans un tableau clair.",
+    feat4_title: "Contexte et références",
+    feat4_desc: "Explique les adaptations culturelles : jeux de mots, noms, idiomes et références perdus à la traduction.",
+    feat5_title: "Communauté",
+    feat5_desc: "Traducteurs et joueurs enrichissent la base de connaissances — avec sources et corrections.",
+    feat6_title: "API rapide",
+    feat6_desc: "Pour les développeurs — une API ouverte pour intégrer les termes à vos projets.",
+    examples_title_a: "Exemples de",
+    examples_title_b: "localisation",
+    footer_text: "© 2026 GameTranslator — un projet sur la traduction adaptative dans les jeux.",
+    footer_contact: "Contact :",
+    error_generic: "Erreur du serveur",
+    error_connection: "Impossible de joindre le serveur.",
+    feat7_title: "Un langage communautaire unique",
+    feat7_desc: "Aide les joueurs de différents pays à parler des mêmes termes de jeu — sans confusion ni disputes de traduction."
+  },
+  pl: {
+    nav_about: "O projekcie", nav_features: "Funkcje", nav_examples: "Przykłady", nav_contact: "Kontakt",
+    hero_title: "Adaptacyjne tłumaczenie gier — we wszystkich językach",
+    hero_subtitle: "Skanujemy wiki, strony fanowskie i oficjalne lokalizacje, abyś mógł sprawdzić, jak brzmi twój ulubiony termin z gry w każdym kraju świata.",
+    step1_label: "Gra lub seria",
+    step1_placeholder: "np. Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Postać, przedmiot lub obiekt",
+    step2_placeholder: "np. Johnny Silverhand, Kryta 101…",
+    search_btn: "Znajdź tłumaczenie",
+    searching_btn: "Wyszukiwanie…",
+    loading: "🧠 AI analizuje wiki i internet…",
+    result_title: "Wynik dla „{obj}”",
+    features_title: "Funkcje",
+    feat1_title: "Wielojęzyczne wiki",
+    feat1_desc: "Zbieramy terminy z wiki, fandomów i oficjalnych stron w ponad 20 językach.",
+    feat2_title: "Inteligentne wyszukiwanie",
+    feat2_desc: "Znajduje dopasowania nawet przy transliteracji i adaptacjach: „Сильверхенд” ↔ „Silverhand”.",
+    feat3_title: "Porównanie lokalizacji",
+    feat3_desc: "Pokazuje oficjalne tłumaczenie, adaptację i oryginał w przejrzystej tabeli.",
+    feat4_title: "Kontekst i odniesienia",
+    feat4_desc: "Wyjaśniamy adaptacje kulturowe: gry słowne, imiona, idiomy i odniesienia utracone w tłumaczeniu.",
+    feat5_title: "Społeczność",
+    feat5_desc: "Tłumacze i gracze wzbogacają bazę wiedzy — ze źródłami i poprawkami.",
+    feat6_title: "Szybkie API",
+    feat6_desc: "Dla programistów — otwarte API do pobierania terminów do własnych projektów.",
+    examples_title_a: "Przykłady",
+    examples_title_b: "lokalizacji",
+    footer_text: "© 2026 GameTranslator — projekt o adaptacyjnym tłumaczeniu gier.",
+    footer_contact: "Kontakt:",
+    error_generic: "Błąd serwera",
+    error_connection: "Nie można połączyć się z serwerem.",
+    feat7_title: "Jeden język społeczności",
+    feat7_desc: "Pomaga graczom z różnych krajów mówić o tych samych terminach z gry — bez zamieszania i sporów o tłumaczenie."
+  },
+  it: {
+    nav_about: "Informazioni", nav_features: "Funzionalità", nav_examples: "Esempi", nav_contact: "Contatti",
+    hero_title: "Traduzione adattiva nei giochi — in tutte le lingue",
+    hero_subtitle: "Analizziamo wiki, siti dei fan e localizzazioni ufficiali per farti scoprire come suona il tuo termine preferito del gioco in qualsiasi paese del mondo.",
+    step1_label: "Gioco o franchise",
+    step1_placeholder: "es. Cyberpunk 2077, The Witcher 3…",
+    step2_label: "Personaggio, oggetto o termine",
+    step2_placeholder: "es. Johnny Silverhand, Rifugio 101…",
+    search_btn: "Cerca traduzione",
+    searching_btn: "Ricerca in corso…",
+    loading: "🧠 L'IA sta analizzando wiki e internet…",
+    result_title: "Risultato per «{obj}»",
+    features_title: "Funzionalità",
+    feat1_title: "Wiki multilingui",
+    feat1_desc: "Raccogliamo termini da wiki, fandom e siti ufficiali in oltre 20 lingue.",
+    feat2_title: "Ricerca intelligente",
+    feat2_desc: "Trova corrispondenze anche con traslitterazione e adattamenti: «Сильверхенд» ↔ «Silverhand».",
+    feat3_title: "Confronto delle localizzazioni",
+    feat3_desc: "Mostra la traduzione ufficiale, l'adattamento e l'originale in una tabella chiara.",
+    feat4_title: "Contesto e riferimenti",
+    feat4_desc: "Spieghiamo gli adattamenti culturali: giochi di parole, nomi, modi di dire e riferimenti persi nella traduzione.",
+    feat5_title: "Community",
+    feat5_desc: "Traduttori e giocatori arricchiscono la base di conoscenza — con fonti e correzioni.",
+    feat6_title: "API veloce",
+    feat6_desc: "Per gli sviluppatori — un'API aperta per integrare i termini nei tuoi progetti.",
+    examples_title_a: "Esempi di",
+    examples_title_b: "adattamento",
+    footer_text: "© 2026 GameTranslator — un progetto sulla traduzione adattiva nei giochi.",
+    footer_contact: "Contatti:",
+    error_generic: "Errore del server",
+    error_connection: "Impossibile raggiungere il server.",
+    feat7_title: "Un linguaggio comunitario unico",
+    feat7_desc: "Aiuta i giocatori di diversi paesi a parlare degli stessi termini di gioco — senza confusione o dispute sulla traduzione."
+  }
+};
+
+/* =========================================================
+   ЛОГИКА i18n
+   ========================================================= */
+let uiLang = 'ru';
+let lastResult = null; // { object, answerHTML }
+
+function detectInitialLang() {
+  const saved = localStorage.getItem('uiLang');
+  if (saved && translations[saved]) return saved;
+  return 'en';
+}
+
+function applyLang(lang) {
+  if (!translations[lang]) lang = 'ru';
+  uiLang = lang;
+  const t = translations[lang];
+
+  document.documentElement.lang = lang;
+
+  const fallback = translations.en;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.textContent = val;
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.placeholder = val;
+  });
+
+  // Кнопка поиска — сохраняем состояние «в процессе»
+  if (searchBtn.disabled) {
+    searchBtn.textContent = t.searching_btn;
+  } else {
+    searchBtn.textContent = t.search_btn;
+  }
+
+  // Перерисовываем заголовок последнего результата
+  if (lastResult) renderResult(lastResult.object, lastResult.answerHTML, {
+    fromCache: lastResult.fromCache,
+    timestamp: lastResult.timestamp
+  });
+
+  // Синхронизируем селект и сохраняем выбор
+  uiLangSelect.value = lang;
+  localStorage.setItem('uiLang', lang);
+    if (typeof applyTosLang === 'function') applyTosLang();
+}
+
+/* =========================================================
+   ЭЛЕМЕНТЫ И СОСТОЯНИЕ
+   ========================================================= */
+const gameInput   = document.getElementById('gameInput');
+const objectInput = document.getElementById('objectInput');
+const step1       = document.getElementById('step1');
+const step2       = document.getElementById('step2');
+const connector   = document.getElementById('connector');
+const connector2  = document.getElementById('connector2');
+const step3       = document.getElementById('step3');
+const subprojectInput = document.getElementById('subprojectInput');
+const searchBtn   = document.getElementById('searchBtn');
+const uiLangSelect = document.getElementById('uiLangSelect');
+
+const resultContainer  = document.getElementById('resultContainer');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const answerBox        = document.getElementById('answerBox');
+
+/* =========================================================
+   ПОДСВЕТКА ШАГОВ
+   ========================================================= */
+function updateStepState(input, step) {
+  step.classList.toggle('filled', input.value.trim().length > 0);
+  connector.classList.toggle('active', gameInput.value.trim().length > 0);
+  connector2.classList.toggle('active', objectInput.value.trim().length > 0);
+}
+gameInput.addEventListener('input',   () => updateStepState(gameInput, step1));
+objectInput.addEventListener('input', () => updateStepState(objectInput, step2));
+subprojectInput.addEventListener('input', () => updateStepState(subprojectInput, step3));
+
+gameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !objectInput.value.trim()) {
+    e.preventDefault();
+    objectInput.focus();
+  }
+});
+
+/* =========================================================
+   ВЫБОР ЯЗЫКОВ ПОИСКА (чипы)
+   ========================================================= */
+document.querySelectorAll('.lang-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('active'));
+});
+
+/* =========================================================
+   ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА ИНТЕРФЕЙСА
+   ========================================================= */
+uiLangSelect.addEventListener('change', (e) => applyLang(e.target.value));
+
+/* =========================================================
+   РЕНДЕР РЕЗУЛЬТАТА
+   ========================================================= */
+function renderResult(object, answerHTML, opts = {}) {
+  const t = translations[uiLang];
+  const title = t.result_title.replace('{obj}', object);
+  let cacheHtml = '';
+  if (opts.fromCache && opts.timestamp) {
+    const timeStr = timeAgo(opts.timestamp, uiLang);
+    cacheHtml = `<div class="cache-badge">
+      <span>${t.cache_from.replace('{time}', timeStr)}</span>
+      <button data-refresh>${t.cache_refresh}</button>
+    </div>`;
+  }
+  let exportBtns = '';
+  let sourcesHtml = '';
+  // Если есть любой Premium — показываем экспорт и источники
+  if (hasAccess(1)) {
+    exportBtns = `
+      <div class="answer-tools">
+        <button class="btn-copy" data-copy>${t.copy_btn}</button>
+        <button class="btn-copy" onclick="exportResult('csv')">${t.export_csv}</button>
+        <button class="btn-copy" onclick="exportResult('txt')">${t.export_txt}</button>
+      </div>`;
+    
+    // Фейковые источники для демонстрации
+    sourcesHtml = `
+      <div class="sources-box">
+        <h4>${t.sources_title}</h4>
+        <ul>
+          <li><a href="#" target="_blank">Fandom Wiki: ${object} (Official)</a></li>
+          <li><a href="#" target="_blank">Reddit r/gaming: Localization discussion</a></li>
+          <li><a href="#" target="_blank">Game Developer Blog</a></li>
+        </ul>
+      </div>`;
+  } else {
+    exportBtns = `<button class="btn-copy" data-copy>${t.copy_btn}</button>`;
+  }
+
+  answerBox.innerHTML =
+    cacheHtml +
+    `<div class="answer-header">
+      <h3>${title}</h3>
+      ${exportBtns}
+    </div>` +
+    answerHTML +
+    sourcesHtml;
+  answerBox.style.display = 'block';
+}
+
+/* =========================================================
+   ОСНОВНАЯ ФУНКЦИЯ ПОИСКА
+   ========================================================= */
+async function searchTerm(forceRefresh = false) {
+  const game = gameInput.value.trim();
+  const obj  = objectInput.value.trim();
+
+  if (!game) { gameInput.focus(); return; }
+  if (!obj)  { objectInput.focus(); return; }
+
+  const selectedLangs = [...document.querySelectorAll('.lang-chip.active')]
+    .map(c => c.textContent.replace(/^\S+\s/, '').trim());
+  const subproject = subprojectInput.value.trim();
+
+  // История + URL
+  saveToHistory(game);
+  updateURL(game, obj, subproject);
+  document.getElementById('historyDropdown').classList.remove('visible');
+
+  const ck = cacheKey(game, obj, subproject);
+
+  // Кэш
+  if (!forceRefresh) {
+    const cached = loadCache(ck);
+    if (cached) {
+      resultContainer.style.display = 'block';
+      loadingIndicator.style.display = 'none';
+      lastResult = {
+        object: obj,
+        answerHTML: marked.parse(cached.answer),
+        answerRaw: cached.answer,
+        fromCache: true,
+        timestamp: cached.ts
+      };
+      renderResult(lastResult.object, lastResult.answerHTML, {
+        fromCache: true,
+        timestamp: cached.ts
+      });
+      return;
+    }
+  }
+
+  resultContainer.style.display = 'block';
+  loadingIndicator.style.display = 'block';
+  answerBox.style.display = 'none';
+  answerBox.innerHTML = '';
+  searchBtn.disabled = true;
+  searchBtn.textContent = translations[uiLang].searching_btn;
+
+  try {
+    const response = await fetch('http://localhost:3000/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        game, 
+        object: obj, 
+        subproject, 
+        targetLangs: selectedLangs,
+        // --- ДАННЫЕ ДЛЯ БЭКЕНДА ---
+        isPro: hasAccess(1) && proToggle.checked,
+        tone: hasAccess(3) ? document.getElementById('toneSelect').value : 'default',
+        glossary: hasAccess(1) ? loadGlossary() : null, // Личный словарь (с 1 уровня)
+        userTier: userTierLevel // Отправляем текущий уровень (0, 1, 2 или 3)
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || translations[uiLang].error_generic);
+    }
+
+    saveCache(ck, data.answer);
+
+    lastResult = {
+      object: obj,
+      answerHTML: marked.parse(data.answer),
+      answerRaw: data.answer,
+      fromCache: false,
+      timestamp: Date.now()
+    };
+    renderResult(lastResult.object, lastResult.answerHTML);
+
+  } catch (error) {
+    lastResult = null;
+    answerBox.innerHTML =
+      `<p style="color: var(--danger);">😕 ${error.message || translations[uiLang].error_connection}</p>`;
+    answerBox.style.display = 'block';
+  } finally {
+    loadingIndicator.style.display = 'none';
+    searchBtn.disabled = false;
+    searchBtn.textContent = translations[uiLang].search_btn;
+  }
+}
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+/* =========================================================
+   ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ
+   ========================================================= */
+const tosModal    = document.getElementById('tosModal');
+const tosBanner   = document.getElementById('tosBanner');
+const tosAccept   = document.getElementById('tosAccept');
+const tosDecline  = document.getElementById('tosDecline');
+const tosOpenLink = document.getElementById('tosOpenLink');
+const tosBannerBtn = document.getElementById('tosBannerBtn');
+const TOS_KEY = 'tosStatus';
+
+function showTos() { tosModal.classList.add('visible'); }
+function hideTos() { tosModal.classList.remove('visible'); }
+
+function initTos() {
+  const status = localStorage.getItem(TOS_KEY);
+  if (status === 'accepted') { /* тихо */ }
+  else if (status === 'declined') { tosBanner.classList.add('visible'); }
+  else { showTos(); }
+}
+
+tosAccept.addEventListener('click', () => {
+  localStorage.setItem(TOS_KEY, 'accepted');
+  hideTos();
+  tosBanner.classList.remove('visible');
+});
+tosDecline.addEventListener('click', () => {
+  localStorage.setItem(TOS_KEY, 'declined');
+  hideTos();
+  tosBanner.classList.add('visible');
+});
+tosOpenLink.addEventListener('click', showTos);
+tosBannerBtn.addEventListener('click', showTos);
+
+// Переключение языковой версии внутри TOS при смене языка
+function applyTosLang() {
+  document.querySelectorAll('[data-tos-lang]').forEach(el => {
+    const target = el.dataset.tosLang;
+    el.style.display = (target === 'ru' && uiLang === 'ru') ||
+                       (target === 'en' && uiLang !== 'ru') ? 'block' : 'none';
+  });
+}
+/* =========================================================
+   ИСТОРИЯ ПОИСКА
+   ========================================================= */
+const HISTORY_KEY = 'searchHistory';
+const MAX_HISTORY = 10;
+const historyDropdown = document.getElementById('historyDropdown');
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveToHistory(game) {
+  const h = loadHistory().filter(x => x !== game);
+  h.unshift(game);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, MAX_HISTORY)));
+}
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function showHistory() {
+  const h = loadHistory();
+  if (!h.length) {
+    historyDropdown.innerHTML = `<div class="history-empty">${translations[uiLang].history_empty}</div>`;
+  } else {
+    historyDropdown.innerHTML = h.map(g =>
+      `<div class="history-item" data-game="${escapeHtml(g)}">${escapeHtml(g)}</div>`
+    ).join('');
+  }
+  historyDropdown.classList.add('visible');
+}
+gameInput.addEventListener('focus', showHistory);
+gameInput.addEventListener('input', () => {
+  if (gameInput.value.trim()) historyDropdown.classList.remove('visible');
+  else showHistory();
+});
+historyDropdown.addEventListener('click', (e) => {
+  const item = e.target.closest('.history-item');
+  if (!item) return;
+  gameInput.value = item.dataset.game;
+  historyDropdown.classList.remove('visible');
+  updateStepState(gameInput, step1);
+  objectInput.focus();
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.input-wrap')) historyDropdown.classList.remove('visible');
+});
+
+/* =========================================================
+   КЭШ РЕЗУЛЬТАТОВ
+   ========================================================= */
+const CACHE_KEY = 'searchCache';
+const CACHE_TTL = 24 * 60 * 60 * 1000;
+
+function cacheKey(game, obj, sub) {
+  return `${game}|${obj}|${sub || ''}`.toLowerCase();
+}
+function loadCache(key) {
+  try {
+    const all = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    const entry = all[key];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > CACHE_TTL) return null;
+    return entry;
+  } catch { return null; }
+}
+function saveCache(key, answer) {
+  try {
+    const all = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    all[key] = { answer, ts: Date.now() };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(all));
+  } catch {}
+}
+function timeAgo(ts, lang) {
+  const t = translations[lang] || translations.en;
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return `${diff} ${t.time_sec}`;
+  if (diff < 3600) return `${Math.floor(diff/60)} ${t.time_min}`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} ${t.time_hour}`;
+  return `${Math.floor(diff/86400)} ${t.time_day}`;
+}
+
+/* =========================================================
+   URL СИНХРОНИЗАЦИЯ
+   ========================================================= */
+function updateURL(game, obj, sub) {
+  const params = new URLSearchParams();
+  params.set('game', game);
+  params.set('object', obj);
+  if (sub) params.set('sub', sub);
+  history.replaceState(null, '', '?' + params.toString());
+}
+function readURL() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    game: p.get('game') || '',
+    object: p.get('object') || '',
+    sub: p.get('sub') || ''
+  };
+}
+
+/* =========================================================
+   КОПИРОВАНИЕ И ОБНОВЛЕНИЕ КЭША (делегирование)
+   ========================================================= */
+answerBox.addEventListener('click', (e) => {
+  if (e.target.closest('[data-refresh]')) {
+    searchTerm(true);
+    return;
+  }
+  const btn = e.target.closest('[data-copy]');
+  if (!btn || !lastResult) return;
+  const textToCopy = lastResult.answerRaw || '';
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    btn.textContent = translations[uiLang].copied_btn;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = translations[uiLang].copy_btn;
+      btn.classList.remove('copied');
+    }, 1500);
+  }).catch(() => {
+    btn.textContent = '⚠️';
+  });
+});
+
+/* =========================================================
+   СЛУЧАЙНЫЙ ТЕРМИН
+   ========================================================= */
+const RANDOM_TERMS = [
+  { game: 'Cyberpunk 2077', object: 'Johnny Silverhand' },
+  { game: 'The Witcher 3', object: 'Geralt of Rivia' },
+  { game: 'Fallout 3', object: 'Vault 101' },
+  { game: 'Skyrim', object: 'Dragonrend' },
+  { game: 'BioShock', object: 'Big Daddy' },
+  { game: 'Minecraft', object: 'Creeper' },
+  { game: 'Roblox', object: 'Doomspire Brickbattle' },
+  { game: 'Dark Souls', object: 'Bonfire' },
+  { game: 'Elden Ring', object: 'Malenia' },
+  { game: 'Portal 2', object: 'Companion Cube' },
+  { game: 'Half-Life 2', object: 'Gravity Gun' },
+  { game: 'Hollow Knight', object: 'Grimm' },
+];
+document.getElementById('randomBtn').addEventListener('click', () => {
+  const t = RANDOM_TERMS[Math.floor(Math.random() * RANDOM_TERMS.length)];
+  gameInput.value = t.game;
+  objectInput.value = t.object;
+  subprojectInput.value = t.sub || '';
+  updateStepState(gameInput, step1);
+  updateStepState(objectInput, step2);
+  updateStepState(subprojectInput, step3);
+  searchTerm();
+});
+
+/* =========================================================
+   ГОРЯЧАЯ КЛАВИША '/' — ФОКУС НА ПОИСК
+   ========================================================= */
+document.addEventListener('keydown', (e) => {
+  // Если нажали '/' и при этом НЕ печатаем текст в другом поле
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    gameInput.focus();
+    gameInput.select();
+  }
+});
+
+/* =========================================================
+   FAQ — РАСКРЫТИЕ
+   ========================================================= */
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+});
+
+/* =========================================================
+   АВТОЗАПУСК ИЗ URL
+   ========================================================= */
+function initFromURL() {
+  const u = readURL();
+  if (!u.game || !u.object) return;
+  gameInput.value = u.game;
+  objectInput.value = u.object;
+  if (u.sub) subprojectInput.value = u.sub;
+  updateStepState(gameInput, step1);
+  updateStepState(objectInput, step2);
+  if (u.sub) updateStepState(subprojectInput, step3);
+  setTimeout(() => searchTerm(), 100);
+}
+
+/* =========================================================
+   ЗАПУСК
+   ========================================================= */
+/* =========================================================
+   ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (Термин / Страница)
+   ========================================================= */
+const tabs = document.querySelectorAll('.search-tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const premiumLock = document.getElementById('premiumLock');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tabContents.forEach(c => c.classList.remove('active'));
+    
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* =========================================================
+   ЛОГИКА ПОДПИСКИ (DEMO)
+   ========================================================= */
+const subModal = document.getElementById('subModal');
+const premiumBtn = document.getElementById('premiumBtn');
+const subCloseBtn = document.getElementById('subCloseBtn');
+
+// 0: Free, 1: Premium, 2: Premium+, 3: Premium++
+let userTierLevel = parseInt(localStorage.getItem('userTierLevel') || '0');
+
+// Хелпер для проверки доступа (включает уровни ниже)
+function hasAccess(requiredLevel) {
+  return userTierLevel >= requiredLevel;
+}
+
+// Элементы окна статуса
+const premiumStatusModal = document.getElementById('premiumStatusModal');
+const premiumStatusCloseBtn = document.getElementById('premiumStatusCloseBtn');
+const cancelSubBtn = document.getElementById('cancelSubBtn');
+
+const adBanner = document.getElementById('adBanner');
+const proToggle = document.getElementById('proToggle');
+const proSwitchLabel = document.getElementById('proSwitchLabel');
+const glossaryModal = document.getElementById('glossaryModal');
+
+const tierNames = ['', '⭐ Premium', '⭐ Premium+', '⭐ Premium++'];
+
+function updatePremiumUI() {
+  // 1. Кнопка в шапке
+  if (userTierLevel > 0) {
+    premiumBtn.textContent = tierNames[userTierLevel] + ' ' + translations[uiLang].status_active;
+    premiumLock.style.display = 'none';
+  } else {
+    premiumBtn.textContent = translations[uiLang].premium_btn;
+    premiumLock.style.display = 'inline';
+  }
+
+  // 2. Реклама (скрываем для всех платных)
+  if (userTierLevel > 0) {
+    adBanner.classList.remove('visible');
+    document.body.classList.remove('has-ad-banner'); // Убираем отступ
+  } else {
+    adBanner.classList.add('visible');
+    document.body.classList.add('has-ad-banner');    // Добавляем отступ
+  }
+
+  // 3. Pro-режим и Глоссарий (уровень 1+)
+  proToggle.checked = userTierLevel >= 1 ? proToggle.checked : false;
+  if (userTierLevel < 1) {
+    proSwitchLabel.classList.add('disabled');
+    proToggle.disabled = true;
+    proSwitchLabel.title = translations[uiLang].pro_only_premium;
+  } else {
+    proSwitchLabel.classList.remove('disabled');
+    proToggle.disabled = false;
+    proSwitchLabel.title = "";
+  }
+
+  // 4. ИИ-Тональность (уровень 3+)
+  const toneOptions = document.getElementById('toneOptions');
+  if (userTierLevel >= 3) {
+    toneOptions.style.display = 'flex';
+  } else {
+    toneOptions.style.display = 'none';
+  }
+}
+
+// Обработчик кнопки Premium в шапке
+premiumBtn.addEventListener('click', () => {
+  if (userTierLevel === 0) {
+    subModal.classList.add('visible');
+  } else {
+    // Генерируем список фич для окна статуса
+    const features = [
+      translations[uiLang].premium_feat_3, // Без рекламы
+      translations[uiLang].premium_feat_2, // Pro-режим
+      translations[uiLang].premium_feat_4, // Глоссарий
+      translations[uiLang].premium_feat_5  // Экспорт
+    ];
+    if (userTierLevel >= 2) features.push(translations[uiLang].premium_plus_feat);
+    if (userTierLevel >= 3) {
+      features.push(translations[uiLang].premium_plus_plus_feat);
+      features.push(translations[uiLang].premium_plus_plus_feat2);
+    }
+
+    document.getElementById('statusTitle').textContent = tierNames[userTierLevel] + ' ' + translations[uiLang].status_active;
+    document.getElementById('statusDesc').textContent = translations[uiLang].status_desc;
+    document.getElementById('statusFeatures').innerHTML = features.map(f => `<li>✅ ${f}</li>`).join('');
+    
+    premiumStatusModal.classList.add('visible');
+  }
+});
+
+// Закрытие окна статуса
+premiumStatusCloseBtn.addEventListener('click', () => {
+  premiumStatusModal.classList.remove('visible');
+});
+
+// Отмена подписки (сброс на 0)
+cancelSubBtn.addEventListener('click', () => {
+  if(confirm('Вы уверены, что хотите отменить подписку?')) {
+    userTierLevel = 0;
+    localStorage.removeItem('userTierLevel');
+    premiumStatusModal.classList.remove('visible');
+    updatePremiumUI();
+  }
+});
+
+// Закрытие окна тарифов
+subCloseBtn.addEventListener('click', () => subModal.classList.remove('visible'));
+
+// Обработка кликов по кнопкам тарифов
+document.querySelectorAll('.buy-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const selectedTier = parseInt(e.target.getAttribute('data-tier'));
+    
+    e.target.textContent = 'Оплата...';
+    setTimeout(() => {
+      userTierLevel = selectedTier;
+      localStorage.setItem('userTierLevel', userTierLevel);
+      subModal.classList.remove('visible');
+      
+      // Возвращаем кнопкам исходный текст
+      document.querySelectorAll('.buy-btn').forEach(b => b.textContent = translations[uiLang].sub_pay_btn);
+      
+      updatePremiumUI();
+      alert(`Оплачен тариф: Level ${selectedTier} (Демо)`);
+    }, 1000);
+  });
+});
+
+/* =========================================================
+   ПЕРЕВОД СТРАНИЦЫ (IFRAME)
+   ========================================================= */
+const translatePageBtn = document.getElementById('translatePageBtn');
+const pageUrlInput = document.getElementById('pageUrlInput');
+const iframeModal = document.getElementById('iframeModal');
+const iframeCloseBtn = document.getElementById('iframeCloseBtn');
+const translatedFrame = document.getElementById('translatedFrame');
+const iframeTitle = document.getElementById('iframeTitle');
+
+translatePageBtn.addEventListener('click', () => {
+  const url = pageUrlInput.value.trim();
+
+  if (!hasAccess(2)) {
+    subModal.classList.add('visible');
+    return;
+  }
+
+  if (!url) {
+    pageUrlInput.focus();
+    return;
+  }
+
+  iframeTitle.textContent = url;
+  iframeModal.classList.add('visible');
+  translatedFrame.srcdoc = `
+    <div style="font-family: sans-serif; padding: 50px; text-align: center; color: #333;">
+      <h1>Здесь будет переведённая страница</h1>
+      <p>Адрес: <b>${url}</b></p>
+      <p style="color: #888; margin-top: 20px;">
+        (В реальности бэкенд скачает этот сайт, переведет весь текст и отдаст готовый HTML сюда).
+      </p>
+    </div>
+  `;
+});
+
+iframeCloseBtn.addEventListener('click', () => {
+  iframeModal.classList.remove('visible');
+  translatedFrame.src = 'about:blank';
+});
+
+/* =========================================================
+   ЭКСПОРТ И ГЛОССАРИЙ
+   ========================================================= */
+window.exportResult = function(format) {
+  if (!lastResult || !lastResult.answerRaw) return;
+  const text = lastResult.answerRaw;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `translation_${lastResult.object.replace(/\s+/g, '_')}.${format}`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const GLOSSARY_KEY = 'userGlossary';
+const openGlossaryBtn = document.getElementById('openGlossaryBtn');
+const saveGlossaryBtn = document.getElementById('saveGlossaryBtn');
+const glossaryList = document.getElementById('glossaryList');
+
+function loadGlossary() {
+  return JSON.parse(localStorage.getItem(GLOSSARY_KEY) || '{}');
+}
+
+function renderGlossary() {
+  const data = loadGlossary();
+  const keys = Object.keys(data);
+  if (!keys.length) {
+    glossaryList.innerHTML = `<li style="color:var(--muted); text-align:center;">${translations[uiLang].glossary_empty}</li>`;
+    return;
+  }
+  glossaryList.innerHTML = keys.map(k => `
+    <li style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+      <span><b>${k}</b> → ${data[k]}</span>
+      <button onclick="removeGlossary('${k}')" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+    </li>
+  `).join('');
+}
+
+window.removeGlossary = function(key) {
+  const data = loadGlossary();
+  delete data[key];
+  localStorage.setItem(GLOSSARY_KEY, JSON.stringify(data));
+  renderGlossary();
+};
+
+openGlossaryBtn.addEventListener('click', () => {
+  if (!hasAccess(1)) {
+    subModal.classList.add('visible');
+    return;
+  }
+  renderGlossary();
+  glossaryModal.classList.add('visible');
+});
+
+saveGlossaryBtn.addEventListener('click', () => {
+  const from = document.getElementById('glossaryFrom').value.trim();
+  const to = document.getElementById('glossaryTo').value.trim();
+  if (!from || !to) return;
+  const data = loadGlossary();
+  data[from] = to;
+  localStorage.setItem(GLOSSARY_KEY, JSON.stringify(data));
+  document.getElementById('glossaryFrom').value = '';
+  document.getElementById('glossaryTo').value = '';
+  renderGlossary();
+});
+// Экспорт глоссария
+document.getElementById('exportGlossaryBtn').addEventListener('click', () => {
+  if (!hasAccess(2)) return alert('Доступно только с Premium+');
+  const data = loadGlossary();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'gametranslator_glossary.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Импорт глоссария
+document.getElementById('importGlossaryBtn').addEventListener('click', () => {
+  if (!hasAccess(2)) return alert('Доступно только с Premium+');
+  document.getElementById('glossaryFile').click();
+});
+
+document.getElementById('glossaryFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const imported = JSON.parse(event.target.result);
+      if (typeof imported === 'object' && imported !== null) {
+        const current = loadGlossary();
+        const merged = { ...current, ...imported };
+        localStorage.setItem(GLOSSARY_KEY, JSON.stringify(merged));
+        renderGlossary();
+        alert(translations[uiLang].glossary_import_success);
+      }
+    } catch (err) {
+      alert('Ошибка чтения файла. Убедитесь, что это правильный JSON.');
+    }
+    e.target.value = ''; // Сбрасываем input
+  };
+  reader.readAsText(file);
+});
+
+/* =========================================================
+   ХУК В applyLang И ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+const originalApplyLang = applyLang;
+applyLang = function(lang) {
+  originalApplyLang(lang);
+  updatePremiumUI();
+  if (tabContents[1].classList.contains('active') && !hasAccess(2)) {
+     premiumLock.style.display = 'inline';
+  }
+};
+
+applyLang(detectInitialLang());
+initTos();
+initFromURL();
+</script>
+</body>
+</html>
