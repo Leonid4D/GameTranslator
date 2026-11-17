@@ -1,2 +1,4 @@
 Keys.env
+.env
 node_modules/
+*.log
