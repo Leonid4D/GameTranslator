@@ -183,33 +183,55 @@ Tavily (как и многие американские AI-сервисы) ре�
 `gtApiBase` не нужен, а запросы к Tavily идут с американского IP Netlify —
 прокси тоже не нужен.
 
-1. Открыть <https://app.netlify.com> и войти через GitHub.
-2. **Add new site → Import an existing project → GitHub** → выбрать репозиторий
-   `Leonid4D/GameTranslator` (при первом импорте Netlify попросит доступ к GitHub).
-3. Настройки сборки подтянутся из `netlify.toml` (build: `node netlify/build.js`,
-   publish: `netlify-site`, functions: `netlify/functions`) — менять не нужно.
-4. **Site configuration → Environment variables** добавить:
-   - `LLM_API_KEY` — ключ LLM (обязательно);
-   - `TAVILY_API_KEY` — ключ Tavily (для Pro-поиска);
-   - по желанию: `LLM_BASE_URL`, `LLM_MODEL`, `WEB_SEARCH_PROVIDER`,
-     `LLM_TIMEOUT_MS=9000`.
-   `Keys.env` в git не попадает — на Netlify секреты берутся только из env.
-5. **Deploys → Trigger deploy → Clear cache and deploy site** (при импорте деплой
-   запускается сам, но без ключей — поэтому после добавления env передеплойте).
-6. Проверить `https://<имя>.netlify.app/api/health` — ожидается
-   `{"ok":true,"services":{"llm":true,"tavily":true,...}}`, затем открыть сам сайт
-   и перевести термин.
-7. Дальше каждый `git push` в `main` Netlify собирает автоматически — панель
-   нужна только чтобы менять переменные окружения.
+### Текущий прод
+
+- Сайт: <https://game-translator-leonid.netlify.app>
+- Панель: <https://app.netlify.com/projects/game-translator-leonid>
+- API — serverless-функция `netlify/functions/api.js`; переменные окружения заданы
+  в Netlify: `LLM_API_KEY`, `TAVILY_API_KEY`, `LLM_BASE_URL`, `LLM_TIMEOUT_MS=9000`,
+  `WEB_SEARCH_PROVIDER=auto`. Tavily с американского IP Netlify работает — Pro
+  отвечает `meta.webProvider: "tavily"`.
+- Деплой сделан через Netlify CLI (git-интеграция не понадобилась).
+
+### Как обновить сайт
+
+```bash
+# один раз: установить CLI и войти (откроется браузер для Authorize)
+npm install -g netlify-cli
+netlify login
+
+# после любых изменений в коде/интерфейсе:
+deploy.cmd
+# или вручную:
+node netlify/build.js
+netlify deploy --prod --dir=netlify-site --functions=netlify/functions --no-build
+```
+
+`git push` сам деплой НЕ запускает (проект не привязан к Git). Привязать
+репозиторий можно в панели: Project configuration → Build & deploy →
+Link repository, тогда Netlify будет собирать на каждый push.
+
+### Если разворачиваете с нуля
+
+1. Создать сайт: `netlify sites:create --name <имя> --account-slug <team>`
+   (или **Add new site → Import an existing project** в панели).
+2. Залить секреты: `netlify env:import env-file --site <имя>` (или панель →
+   Environment variables).
+3. Задеплоить: `netlify deploy --prod --dir=netlify-site --functions=netlify/functions --no-build`.
+
+⚠️ Новые сайты Netlify по умолчанию закрыты SSO для команды: вместо контента
+отдаётся `401 Login Redirect`. Сделать публичным: панель → Project configuration →
+Access & security → снять «Require SSO», либо через API
+`PATCH /api/v1/sites/<site_id>` с телом `{"sso_login": false}`.
 
 Ограничения free-тарифа: функция живёт максимум ~10 секунд на запрос — обычный
 перевод идёт 2–6 с, но самый долгий Pro-запрос может упереться в лимит (поэтому
 советуем `LLM_TIMEOUT_MS=9000`: тогда вернётся аккуратная ошибка 504, а не 502 от
 Netlify). Лимиты — 100 ГБ трафика и 125 000 вызовов функций в месяц.
 
-Сайт с GitHub Pages после деплоя тоже можно связать с Netlify (необязательно):
-в консоли на `leonid4d.github.io` выполнить
-`localStorage.setItem('gtApiBase','https://<имя>.netlify.app')` и перезагрузить.
+Сайт с GitHub Pages тоже можно связать с Netlify (необязательно): в консоли на
+`leonid4d.github.io` выполнить
+`localStorage.setItem('gtApiBase','https://game-translator-leonid.netlify.app')` и перезагрузить.
 
 ## Деплой бэкенда (Render)
 
