@@ -1,0 +1,27 @@
+# Конфигурация для деплоя бэкенда на Render (https://render.com).
+# Файл читается автоматически, если подключить репозиторий как Blueprint
+# (New + -> Blueprint). Секреты задаются в дашборде Render, в git не попадают.
+services:
+  - type: web
+    name: game-translator-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: LLM_BASE_URL
+        value: https://api.deepseek.com/v1
+      - key: LLM_MODEL
+        value: deepseek-chat
+      - key: LLM_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: WEB_SEARCH_PROVIDER
+        value: auto
+      - key: FRONTEND_ORIGIN
+        value: https://leonid4d.github.io
+      - key: CORS_ORIGINS
+        value: https://leonid4d.github.io

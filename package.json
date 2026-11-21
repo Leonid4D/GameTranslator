@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "check": "node --check server.js"
+    "check": "node --check server.js",
+    "tavily:check": "node check-tavily.js"
   },
   "engines": {
     "node": ">=18"
