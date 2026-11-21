@@ -294,11 +294,23 @@
   .answer-box h1, .answer-box h2, .answer-box h3 {
     margin-top: 1em; margin-bottom: 0.5em; color: var(--accent-2);
   }
-  .answer-box table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+  .answer-box table {
+    width: 100%; border-collapse: collapse; margin: 0; min-width: 0; table-layout: auto;
+  }
+  /* Обёртка вокруг таблиц из ответа нейросети: горизонтальный скролл внутри карточки,
+     а не «уползание» всей страницы вбок */
+  .answer-table-wrap {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    margin: 1em 0; border-radius: 8px; max-width: 100%;
+  }
   .answer-box th, .answer-box td {
     border: 1px solid var(--border); padding: 8px 12px; text-align: left;
+    vertical-align: top; white-space: normal; overflow-wrap: anywhere; word-break: break-word;
   }
   .answer-box th { background: var(--bg-alt); }
+  .answer-box h1 { font-size: 1.35rem; line-height: 1.3; overflow-wrap: anywhere; }
+  .answer-box h2 { font-size: 1.2rem; }
+  .answer-box h3 { font-size: 1.05rem; }
   .answer-box ul, .answer-box ol { padding-left: 1.5em; margin: 0.5em 0; }
   .answer-box code { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
   .answer-box pre { background: var(--bg-alt); padding: 14px; border-radius: 8px; overflow-x: auto; }
@@ -338,7 +350,7 @@
     border-radius: 14px;
     background: var(--card);
   }
-  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .table-wrap table { width: 100%; border-collapse: collapse; min-width: 640px; }
   th, td {
     padding: 14px 18px;
     text-align: left;
@@ -927,8 +939,9 @@
     .answer-tools { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .btn-copy { width: 100%; }
 
-    /* Таблицы внутри ответа нейросети */
-    .answer-box table { display: block; overflow-x: auto; white-space: nowrap; }
+    /* Таблицы внутри ответа нейросети: скроллим внутри обёртки, текст переносится */
+    .answer-table-wrap table { min-width: 420px; }
+    .answer-box { padding: 16px; }
 
     /* Модальные окна */
     .modal-box { width: 95%; margin: 10px; }
@@ -2053,6 +2066,40 @@ uiLangSelect.addEventListener('change', (e) => applyLang(e.target.value));
 /* =========================================================
    РЕНДЕР РЕЗУЛЬТАТА
    ========================================================= */
+// Таблицы из markdown оборачиваем в скроллируемый контейнер, чтобы широкие
+// таблицы не вылезали за карточку и не «уползал» весь сайт.
+function renderAnswerHTML(markdown) {
+  const container = document.createElement('div');
+  container.innerHTML = marked.parse(markdown || '');
+
+  container.querySelectorAll('table').forEach((table) => {
+    // Ширины колонок задаём через <colgroup>, иначе браузер сплющивает
+    // «ЯЗЫК» и «Русский» в узкие столбики и ломает слова по буквам.
+    const headerCells = table.querySelectorAll('thead th');
+    const firstRow = table.querySelector('tr');
+    const colCount = headerCells.length || (firstRow ? firstRow.children.length : 0);
+    const widths = colCount === 2 ? [34, 66] : colCount === 3 ? [18, 27, 55] : null;
+    if (widths) {
+      table.style.tableLayout = 'fixed';
+      const colgroup = document.createElement('colgroup');
+      widths.forEach((w) => {
+        const col = document.createElement('col');
+        col.style.width = w + '%';
+        colgroup.appendChild(col);
+      });
+      table.prepend(colgroup);
+    }
+
+    // Оборачиваем в скроллируемый контейнер, чтобы таблица не вылезала за карточку.
+    const wrap = document.createElement('div');
+    wrap.className = 'answer-table-wrap';
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  });
+
+  return container.innerHTML;
+}
+
 function renderResult(object, answerHTML, opts = {}) {
   const t = translations[uiLang];
   const title = t.result_title.replace('{obj}', object);
@@ -2129,7 +2176,7 @@ async function searchTerm(forceRefresh = false) {
       loadingIndicator.style.display = 'none';
       lastResult = {
         object: obj,
-        answerHTML: marked.parse(cached.answer),
+        answerHTML: renderAnswerHTML(cached.answer),
         answerRaw: cached.answer,
         fromCache: true,
         timestamp: cached.ts
@@ -2189,7 +2236,7 @@ async function searchTerm(forceRefresh = false) {
 
     lastResult = {
       object: obj,
-      answerHTML: marked.parse(data.answer),
+      answerHTML: renderAnswerHTML(data.answer),
       answerRaw: data.answer,
       fromCache: false,
       timestamp: Date.now()
