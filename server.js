@@ -653,7 +653,7 @@ function translationsToMarkdown({ rows, summary }) {
     for (const row of rows) {
         const official = escapeMarkdownCell(row.official || '—');
         const alternatives = row.alternatives.length ? escapeMarkdownCell(row.alternatives.join('; ')) : '—';
-        const confidence = row.verified ? `${row.confidence} (подтверждено источником)` : row.confidence;
+        const confidence = row.verified ? `${row.confidence} (проверено по источнику)` : row.confidence;
         lines.push(`| ${escapeMarkdownCell(`${row.langName} (${row.lang})`)} | ${official} | ${alternatives} | ${confidence} |`);
     }
 

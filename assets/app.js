@@ -195,8 +195,9 @@ const translations = {
     confidence_high: "высокая",
     confidence_medium: "средняя",
     confidence_low: "низкая",
-    verified_badge: "подтверждено",
+    verified_badge: "проверено",
     verified_hint: "Термин встречается в найденных источниках",
+    copy_col: "Копия",
     meta_wiki: "вики",
     meta_web: "веб",
     meta_structured: "сравнение",
@@ -350,6 +351,7 @@ const translations = {
     confidence_low: "low",
     verified_badge: "verified",
     verified_hint: "The term appears in the sources we found",
+    copy_col: "Copy",
     meta_wiki: "wiki",
     meta_web: "web",
     meta_structured: "comparison",
@@ -875,7 +877,8 @@ function renderComparisonTable(rows) {
     `<tr><th>${escapeHtml(tr('lang_col'))}</th>` +
     `<th>${escapeHtml(tr('official_col'))}</th>` +
     `<th>${escapeHtml(tr('alternatives_col'))}</th>` +
-    `<th>${escapeHtml(tr('confidence_col'))}</th><th></th></tr>`;
+    `<th>${escapeHtml(tr('confidence_col'))}</th>` +
+    `<th class="copy-col">${escapeHtml(tr('copy_col'))}</th></tr>`;
 
   const body = rows
     .map((row) => {
@@ -903,7 +906,7 @@ function renderComparisonTable(rows) {
         )}</span> <code>${escapeHtml(row.lang)}</code></td>` +
         `<td data-label="${escapeHtml(tr('official_col'))}">${official}</td>` +
         `<td data-label="${escapeHtml(tr('alternatives_col'))}" class="alts">${alternatives}</td>` +
-        `<td data-label="${escapeHtml(tr('confidence_col'))}" class="badges-cell">${confidence}${verified}</td>` +
+        `<td data-label="${escapeHtml(tr('confidence_col'))}" class="badges-cell"><div class="badges">${confidence}${verified}</div></td>` +
         `<td class="copy-cell"><button type="button" class="btn-row-copy" data-copy-row="${escapeHtml(
           row.lang
         )}" title="${escapeHtml(tr('copy_row'))}" aria-label="${escapeHtml(tr('copy_row'))}">⧉</button></td>` +

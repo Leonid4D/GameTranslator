@@ -16,12 +16,23 @@ function read(relative) {
 
 test('index.html ссылается только на существующие локальные файлы', () => {
     const html = read('index.html');
-    const references = [...html.matchAll(/(?:src|href)="(?!https?:|mailto:|#|data:|about:)([^"]+)"/g)].map((match) => match[1]);
+    const references = [...html.matchAll(/(?:src|href)="(?!https?:|mailto:|#|data:|about:)([^"]+)"/g)]
+        .map((match) => match[1].split('?')[0]);
 
     assert.ok(references.length > 0, 'не найдено ни одной локальной ссылки');
     for (const reference of new Set(references)) {
         assert.ok(fs.existsSync(path.join(root, reference)), `нет файла: ${reference}`);
     }
+});
+
+test('ассеты версионированы, а статика не кэшируется как immutable', () => {
+    const html = read('index.html');
+    assert.match(html, /assets\/style\.css\?v=\d+\.\d+/, 'CSS должен подключаться с версией');
+    assert.match(html, /assets\/app\.js\?v=\d+\.\d+/, 'JS должен подключаться с версией');
+
+    const headers = read('_headers');
+    const assetsBlock = headers.split('/assets/*')[1] || '';
+    assert.equal(/immutable/.test(assetsBlock), false, '/assets/* не должен быть immutable без хэша в имени');
 });
 
 test('index.html не содержит inline-скриптов, кроме JSON-LD', () => {

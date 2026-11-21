@@ -1004,19 +1004,20 @@
   .result-error { color: var(--danger); overflow-wrap: anywhere; }
 
   /* ---------- Таблица сравнения локализаций ---------- */
-  .answer-box .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; min-width: 640px; }
-  .answer-box .comparison-table th:nth-child(1) { width: 18%; }
-  .answer-box .comparison-table th:nth-child(2) { width: 26%; }
-  .answer-box .comparison-table th:nth-child(3) { width: 30%; }
-  .answer-box .comparison-table th:nth-child(4) { width: 19%; }
-  .answer-box .comparison-table th:nth-child(5) { width: 7%; }
+  .answer-box .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; min-width: 600px; }
+  .answer-box .comparison-table th:nth-child(1) { width: 15%; }
+  .answer-box .comparison-table th:nth-child(2) { width: 23%; }
+  .answer-box .comparison-table th:nth-child(3) { width: 27%; }
+  .answer-box .comparison-table th:nth-child(4) { width: 24%; }
+  .answer-box .comparison-table th:nth-child(5) { width: 11%; }
   .answer-box .comparison-table th,
   .answer-box .comparison-table td {
     border: 1px solid var(--border);
-    padding: 10px 12px;
+    padding: 9px 10px;
     text-align: left;
     vertical-align: top;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    word-break: normal;
   }
   .answer-box .comparison-table th {
     background: var(--bg-alt);
@@ -1036,7 +1037,17 @@
   .answer-box .comparison-table .translation-value { color: var(--accent-2); font-weight: 600; }
   .answer-box .comparison-table .alts { display: flex; flex-direction: column; gap: 4px; }
   .answer-box .comparison-table .alt { font-size: 0.82rem; color: var(--muted); }
-  .answer-box .comparison-table .badges-cell { white-space: nowrap; }
+  .answer-box .comparison-table .badges-cell { white-space: normal; }
+  .answer-box .comparison-table .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .answer-box .comparison-table .badges .badge { margin-right: 0; }
+  .answer-box .comparison-table .copy-col,
+  .answer-box .comparison-table .copy-cell { text-align: center; }
+  .answer-box .comparison-table .copy-col { font-size: 0.68rem; letter-spacing: 0.02em; }
   .btn-row-copy {
     border: 1px solid var(--border);
     background: var(--bg-alt);
@@ -1117,12 +1128,9 @@
     }
   }
 
-  @media (max-width: 600px) {
-    .theme-toggle { width: 34px; height: 34px; }
-    .meta-badges { margin-top: 8px; }
-
-    /* Таблица сравнения на телефоне превращается в карточки: горизонтальный
-       скролл на узком экране неудобен, а колонки сжимаются до нечитаемых. */
+  @media (max-width: 720px) {
+    /* Таблица сравнения на телефоне и планшете превращается в карточки:
+       горизонтальный скролл неудобен, а колонки сжимаются до нечитаемых. */
     .answer-box .comparison-table { display: block; min-width: 0; table-layout: auto; }
     .answer-box .comparison-table thead { display: none; }
     .answer-box .comparison-table tbody { display: block; }
@@ -1153,6 +1161,11 @@
     .answer-box .comparison-table td.copy-cell { justify-content: flex-end; }
     .answer-box .comparison-table td.copy-cell::before { content: none; }
     .answer-box .comparison-table .alts { flex-direction: row; flex-wrap: wrap; gap: 4px 8px; }
+  }
+
+  @media (max-width: 600px) {
+    .theme-toggle { width: 34px; height: 34px; }
+    .meta-badges { margin-top: 8px; }
 
     /* Баннер рекламы на мобильных занимает две строки — увеличиваем отступ,
        иначе он перекрывает контент. */

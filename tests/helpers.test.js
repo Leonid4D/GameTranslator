@@ -190,7 +190,7 @@ test('translationsToMarkdown строит таблицу и экранирует
     assert.match(markdown, /Итог/);
     assert.match(markdown, /\| Язык \| Официальный перевод \|/);
     assert.match(markdown, /Термин \\\| с палкой/);
-    assert.match(markdown, /подтверждено источником/);
+    assert.match(markdown, /проверено по источнику/);
     assert.match(markdown, /\*\*Русский:\*\* Пояснение/);
 });
 
