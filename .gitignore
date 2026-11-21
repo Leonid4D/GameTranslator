@@ -1,4 +1,6 @@
 Keys.env
 .env
 node_modules/
+.netlify/
+netlify-site/
 *.log

@@ -30,6 +30,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
+    "serverless-http": "^4.0.0",
     "yookassa-api-sdk": "^0.1.1"
   },
   "devDependencies": {

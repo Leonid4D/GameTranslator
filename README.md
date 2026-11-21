@@ -157,9 +157,9 @@ Tavily (как и многие американские AI-сервисы) ре�
 
 Два рабочих решения:
 
-1. **Бэкенд вне РФ** (рекомендуется): на Render/Railway/VPS запросы уходят с
-   зарубежного IP, блокировка исчезает сама, и заодно появляется публичный
-   бэкенд для сайта с GitHub Pages. Прокси не нужен.
+1. **Бэкенд вне РФ** (рекомендуется): на Netlify (он же рекомендован для сайта,
+   см. раздел ниже), Render или VPS запросы уходят с зарубежного IP, блокировка
+   исчезает сама, и заодно появляется публичный бэкенд для сайта. Прокси не нужен.
 2. **HTTP-прокси с зарубежным IP** — если бэкенд должен остаться на домашнем ПК:
    - `TAVILY_PROXY=http://login:password@host:port` в `Keys.env`;
    - прокси применяется **только** к запросам Tavily, остальное идёт напрямую;
@@ -174,7 +174,50 @@ Tavily (как и многие американские AI-сервисы) ре�
 перенаправляет запросы Tavily на свой эндпоинт (например, Cloudflare Worker,
 проксирующий `https://api.tavily.com`).
 
-## Деплой бэкенда (Render) и связка с GitHub Pages
+## Деплой на Netlify (рекомендуется, без VPN)
+
+В репозитории уже всё готово: `netlify.toml` (команда сборки и редирект `/api/*`
+на функцию), `netlify/build.js` (складывает статику в `netlify-site/`) и
+`netlify/functions/api.js` (обёртка `serverless-http` над Express-приложением из
+`server.js`). Фронтенд и API живут на одном домене `*.netlify.app`, поэтому
+`gtApiBase` не нужен, а запросы к Tavily идут с американского IP Netlify —
+прокси тоже не нужен.
+
+1. Открыть <https://app.netlify.com> и войти через GitHub.
+2. **Add new site → Import an existing project → GitHub** → выбрать репозиторий
+   `Leonid4D/GameTranslator` (при первом импорте Netlify попросит доступ к GitHub).
+3. Настройки сборки подтянутся из `netlify.toml` (build: `node netlify/build.js`,
+   publish: `netlify-site`, functions: `netlify/functions`) — менять не нужно.
+4. **Site configuration → Environment variables** добавить:
+   - `LLM_API_KEY` — ключ LLM (обязательно);
+   - `TAVILY_API_KEY` — ключ Tavily (для Pro-поиска);
+   - по желанию: `LLM_BASE_URL`, `LLM_MODEL`, `WEB_SEARCH_PROVIDER`,
+     `LLM_TIMEOUT_MS=9000`.
+   `Keys.env` в git не попадает — на Netlify секреты берутся только из env.
+5. **Deploys → Trigger deploy → Clear cache and deploy site** (при импорте деплой
+   запускается сам, но без ключей — поэтому после добавления env передеплойте).
+6. Проверить `https://<имя>.netlify.app/api/health` — ожидается
+   `{"ok":true,"services":{"llm":true,"tavily":true,...}}`, затем открыть сам сайт
+   и перевести термин.
+7. Дальше каждый `git push` в `main` Netlify собирает автоматически — панель
+   нужна только чтобы менять переменные окружения.
+
+Ограничения free-тарифа: функция живёт максимум ~10 секунд на запрос — обычный
+перевод идёт 2–6 с, но самый долгий Pro-запрос может упереться в лимит (поэтому
+советуем `LLM_TIMEOUT_MS=9000`: тогда вернётся аккуратная ошибка 504, а не 502 от
+Netlify). Лимиты — 100 ГБ трафика и 125 000 вызовов функций в месяц.
+
+Сайт с GitHub Pages после деплоя тоже можно связать с Netlify (необязательно):
+в консоли на `leonid4d.github.io` выполнить
+`localStorage.setItem('gtApiBase','https://<имя>.netlify.app')` и перезагрузить.
+
+## Деплой бэкенда (Render)
+
+⚠️ С российских провайдеров панель `dashboard.render.com` недоступна: TCP/TLS до
+IP Render блокируется на уровне сети. Обход DPI (zapret) тут не помогает —
+проверено: TLS к этим IP не проходит даже с чужим SNI. При этом хостить на Render
+можно: приложения `*.onrender.com` открываются нормально, панель нужна только на
+время деплоя (через VPN). Если VPN нет — используйте Netlify (раздел выше).
 
 В репозитории лежит `render.yaml` — Blueprint для [Render](https://render.com):
 

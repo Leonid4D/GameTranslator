@@ -2,8 +2,12 @@
 // Запуск: npm start (или node server.js)
 'use strict';
 
-// 1. Переменные окружения: сначала Keys.env (исторический файл проекта), затем .env
-require('dotenv').config({ path: './Keys.env', quiet: true });
+// 1. Переменные окружения: сначала Keys.env (исторический файл проекта), затем .env.
+// Путь к Keys.env считаем от каталога server.js, чтобы файл находился при запуске
+// из любой рабочей директории (Netlify/серверless-функция файла не содержит и
+// берёт значения из переменных окружения).
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, 'Keys.env'), quiet: true });
 require('dotenv').config({ quiet: true });
 
 const express = require('express');
@@ -731,7 +735,7 @@ app.post('/api/translate', translateLimiter, async (req, res) => {
             }
         }
 
-        const prompt = buildPrompt({ game, object, subproject, targetLangs, tone, glossary, context });
+        let prompt = buildPrompt({ game, object, subproject, targetLangs, tone, glossary, context });
         if (webBlock) {
             prompt += `\nДополнительный контекст из интернета:\n"""\n${webBlock}\n"""\n`;
         }
@@ -919,28 +923,38 @@ app.use((error, req, res, next) => {
     return res.status(500).json({ error: 'Внутренняя ошибка сервера.' });
 });
 
-/* ---------- запуск ---------- */
+/* ---------- запуск (локальный сервер) ---------- */
 
-const server = app.listen(config.port, () => {
-    const mark = (ok) => (ok ? '✓' : '✗');
-    console.log('');
-    console.log('  GameTranslator backend');
-    console.log(`  http://localhost:${config.port}  (health: /api/health)`);
-    console.log(`  LLM      ${mark(llmReady)}  ${config.llm.model} @ ${config.llm.baseUrl}`);
-    console.log(`  Tavily   ${mark(tavilyReady)}  ${tavilyReady ? 'ключ задан (проверяется при первом Pro-запросе)' : 'ключ не задан или заглушка'}`);
-    console.log(`  Поиск    ${mark(WEB_SEARCH_PROVIDER !== 'off')}  ${WEB_SEARCH_PROVIDER.toUpperCase()}${WEB_SEARCH_PROVIDER === 'auto' ? ' (Tavily → DuckDuckGo)' : ''}`);
-    if (config.tavilyProxy) console.log('  Прокси   ✓  Tavily идёт через ' + config.tavilyProxy.replace(/\/\/[^@]*@/, '//***@'));
-    console.log(`  ЮKassa   ${mark(yookassaReady)}  ${yookassaReady ? 'платежи включены' : 'ключи не заданы — оплата отключена'}`);
-    console.log('');
-});
+// В Netlify-функции приложение только импортируется: слушать порт там нельзя.
+// Поэтому listen вызывается лишь при прямом запуске "node server.js".
+function startServer() {
+    const server = app.listen(config.port, () => {
+        const mark = (ok) => (ok ? '✓' : '✗');
+        console.log('');
+        console.log('  GameTranslator backend');
+        console.log(`  http://localhost:${config.port}  (health: /api/health)`);
+        console.log(`  LLM      ${mark(llmReady)}  ${config.llm.model} @ ${config.llm.baseUrl}`);
+        console.log(`  Tavily   ${mark(tavilyReady)}  ${tavilyReady ? 'ключ задан (проверяется при первом Pro-запросе)' : 'ключ не задан или заглушка'}`);
+        console.log(`  Поиск    ${mark(WEB_SEARCH_PROVIDER !== 'off')}  ${WEB_SEARCH_PROVIDER.toUpperCase()}${WEB_SEARCH_PROVIDER === 'auto' ? ' (Tavily → DuckDuckGo)' : ''}`);
+        if (config.tavilyProxy) console.log('  Прокси   ✓  Tavily идёт через ' + config.tavilyProxy.replace(/\/\/[^@]*@/, '//***@'));
+        console.log(`  ЮKassa   ${mark(yookassaReady)}  ${yookassaReady ? 'платежи включены' : 'ключи не заданы — оплата отключена'}`);
+        console.log('');
+    });
 
-function shutdown(signal) {
-    console.log(`\n[server] Получен ${signal}, останавливаемся…`);
-    server.close(() => process.exit(0));
-    setTimeout(() => process.exit(0), 5000).unref();
+    function shutdown(signal) {
+        console.log(`\n[server] Получен ${signal}, останавливаемся…`);
+        server.close(() => process.exit(0));
+        setTimeout(() => process.exit(0), 5000).unref();
+    }
+
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+    return server;
 }
 
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
+if (require.main === module) {
+    startServer();
+}
 
 module.exports = app;

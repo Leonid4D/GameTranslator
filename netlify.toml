@@ -1,0 +1,27 @@
+# Netlify: статический фронтенд + API из server.js как serverless-функция.
+# Оба живут на одном домене (*.netlify.app), поэтому API_BASE во фронтенде
+# остаётся пустым и запросы /api/* идут на тот же хост.
+#
+# Перед деплоем в Netlify -> Site configuration -> Environment variables задать:
+#   LLM_API_KEY      (обязательно)
+#   TAVILY_API_KEY   (для Pro-поиска; с американского IP Netlify не блокируется)
+#   LLM_BASE_URL / LLM_MODEL / WEB_SEARCH_PROVIDER — по желанию
+# Keys.env в git не попадает, на Netlify секреты берутся только из env.
+
+[build]
+  command = "node netlify/build.js"
+  publish = "netlify-site"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  node_bundler = "esbuild"
+
+# /api/* -> serverless-функция Express
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
