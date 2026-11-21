@@ -14,7 +14,6 @@ const dns = require('dns').promises;
 const net = require('net');
 const { URL } = require('url');
 
-const { tavily } = require('@tavily/core');
 const { YooKassa } = require('yookassa-api-sdk');
 
 /* =========================================================
@@ -42,6 +41,10 @@ const config = {
         timeoutMs: num(process.env.LLM_TIMEOUT_MS, 60000),
     },
     tavilyKey: (process.env.TAVILY_API_KEY || '').trim(),
+    // Tavily блокирует часть IP-адресов (в т.ч. российские) на уровне CDN:
+    // запрос с ключом оттуда получает 403. Если есть прокси — укажите его здесь.
+    tavilyBaseUrl: (process.env.TAVILY_BASE_URL || 'https://api.tavily.com').trim().replace(/\/+$/, ''),
+    tavilyProxy: (process.env.TAVILY_PROXY || process.env.HTTPS_PROXY || process.env.HTTP_PROXY || '').trim(),
     yookassa: {
         shopId: (process.env.YOOKASSA_SHOP_ID || '').trim(),
         secretKey: (process.env.YOOKASSA_SECRET_KEY || '').trim(),
@@ -63,7 +66,6 @@ const llmReady = isSet(config.llm.apiKey);
 const tavilyReady = isSet(config.tavilyKey);
 const yookassaReady = isSet(config.yookassa.shopId) && isSet(config.yookassa.secretKey);
 
-const tvly = tavilyReady ? tavily({ apiKey: config.tavilyKey }) : null;
 const yookassa = yookassaReady
     ? YooKassa({ shop_id: config.yookassa.shopId, secret_key: config.yookassa.secretKey })
     : null;
@@ -77,6 +79,31 @@ const UA = 'GameTranslator/1.0 (+https://github.com/Leonid4D/GameTranslator)';
 const http = axios.create({
     timeout: 10000,
     headers: { 'User-Agent': UA, 'Accept-Language': 'ru,en;q=0.8' },
+});
+
+// Прокси для Tavily: http://user:pass@host:port
+function parseProxy(raw) {
+    if (!raw) return undefined;
+    try {
+        const url = new URL(raw);
+        return {
+            protocol: url.protocol.replace(':', ''),
+            host: url.hostname,
+            port: Number(url.port) || (url.protocol === 'https:' ? 443 : 80),
+            auth: url.username
+                ? { username: decodeURIComponent(url.username), password: decodeURIComponent(url.password) }
+                : undefined,
+        };
+    } catch {
+        console.warn('[config] Не удалось разобрать TAVILY_PROXY, прокси игнорируется');
+        return undefined;
+    }
+}
+
+const tavilyHttp = axios.create({
+    timeout: 20000,
+    proxy: parseProxy(config.tavilyProxy),
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
 
 // Простой TTL-кэш для контекста (вики/веб), чтобы не долбить внешние API
@@ -331,18 +358,38 @@ function normalizeResults(results, source) {
 }
 
 async function searchViaTavily(query) {
-    if (!tvly) return [];
+    if (!tavilyReady) return [];
     if (Date.now() < tavilyCooldownUntil) return [];
 
     try {
-        const response = await tvly.search(query, { searchDepth: 'advanced', maxResults: 3 });
-        return normalizeResults(response?.results || [], 'tavily');
+        const response = await tavilyHttp.post(
+            `${config.tavilyBaseUrl}/search`,
+            {
+                query,
+                search_depth: 'advanced',
+                max_results: 3,
+                include_answer: false,
+            },
+            {
+                headers: { Authorization: `Bearer ${config.tavilyKey}` },
+            }
+        );
+
+        return normalizeResults(response.data?.results || [], 'tavily');
     } catch (error) {
         const status = error?.response?.status;
         tavilyCooldownUntil = Date.now() + TAVILY_COOLDOWN_MS;
-        console.warn(
-            `[search] Tavily недоступен${status ? ` (HTTP ${status})` : ''} — 10 минут работаем через DuckDuckGo`
-        );
+
+        if (status === 403) {
+            console.warn(
+                '[search] Tavily вернул 403 — похоже, запрос блокируется на уровне CDN по IP/региону. ' +
+                    'Нужен прокси (TAVILY_PROXY) или запуск бэкенда вне РФ. 10 минут работаем через DuckDuckGo'
+            );
+        } else {
+            console.warn(
+                `[search] Tavily недоступен${status ? ` (HTTP ${status})` : ''} — 10 минут работаем через DuckDuckGo`
+            );
+        }
         return [];
     }
 }
@@ -625,6 +672,7 @@ app.get('/api/health', (req, res) => {
         webSearch: {
             provider: WEB_SEARCH_PROVIDER,
             fallback: 'duckduckgo',
+            tavilyProxy: Boolean(config.tavilyProxy),
         },
         model: config.llm.model,
     });
@@ -881,6 +929,7 @@ const server = app.listen(config.port, () => {
     console.log(`  LLM      ${mark(llmReady)}  ${config.llm.model} @ ${config.llm.baseUrl}`);
     console.log(`  Tavily   ${mark(tavilyReady)}  ${tavilyReady ? 'ключ задан (проверяется при первом Pro-запросе)' : 'ключ не задан или заглушка'}`);
     console.log(`  Поиск    ${mark(WEB_SEARCH_PROVIDER !== 'off')}  ${WEB_SEARCH_PROVIDER.toUpperCase()}${WEB_SEARCH_PROVIDER === 'auto' ? ' (Tavily → DuckDuckGo)' : ''}`);
+    if (config.tavilyProxy) console.log('  Прокси   ✓  Tavily идёт через ' + config.tavilyProxy.replace(/\/\/[^@]*@/, '//***@'));
     console.log(`  ЮKassa   ${mark(yookassaReady)}  ${yookassaReady ? 'платежи включены' : 'ключи не заданы — оплата отключена'}`);
     console.log('');
 });

@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/Leonid4D/GameTranslator#readme",
   "dependencies": {
-    "@tavily/core": "^1.0.0",
     "axios": "^1.21.0",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",

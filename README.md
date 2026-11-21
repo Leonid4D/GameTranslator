@@ -40,6 +40,7 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 | `LLM_MODEL` | Имя модели, по умолчанию `deepseek-chat` |
 | `TAVILY_API_KEY` | Веб-контекст для Pro-режима. Пусто — Pro работает без поиска |
 | `WEB_SEARCH_PROVIDER` | `auto` (Tavily → DuckDuckGo), `tavily`, `duckduckgo` или `off` |
+| `TAVILY_PROXY` | Прокси только для Tavily (`http://user:pass@host:port`), если CDN блокирует IP |
 | `YOOKASSA_SHOP_ID` / `YOOKASSA_SECRET_KEY` | Платёжка. Пока пусто — оплата отключена (503) |
 | `FRONTEND_ORIGIN` | Куда вернуть пользователя после оплаты |
 | `CORS_ORIGINS` | Белый список источников через запятую; пусто — разрешены все |
@@ -90,6 +91,9 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
   DuckDuckGo — бесплатный best-effort: при массовых запросах он показывает капчу,
   тогда Pro-режим работает без веб-контекста (вики-контекст при этом остаётся).
   Для стабильного Pro нужен рабочий ключ Tavily.
+- **Если Tavily отвечает 403 даже с новым ключом** — это блокировка на уровне CDN
+  по IP/региону, а не проблема ключа (запрос без ключа получает 401, с любым ключом — 403).
+  Решения: указать `TAVILY_PROXY` или запустить бэкенд вне РФ (Render, Railway, VPS).
 - Если веб-поиск не нужен вообще, поставьте `WEB_SEARCH_PROVIDER=off`.
 - **Уровень подписки** (`userTier`) приходит с клиента и хранится в `localStorage` —
   это демо-режим. Для реальных продаж нужна авторизация и проверка подписки на сервере.
