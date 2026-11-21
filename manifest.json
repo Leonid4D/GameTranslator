@@ -1,0 +1,19 @@
+{
+  "name": "GameTranslator — перевод игровых терминов",
+  "short_name": "GameTranslator",
+  "description": "Адаптивный перевод игровых терминов: официальные и фанатские варианты, сравнение локализаций, источники.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

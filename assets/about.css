@@ -1,0 +1,145 @@
+  :root {
+    --bg: #0d1117; --bg-alt: #161b22; --card: #1c2128;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --accent-2: #7ee787;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .logo {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-right: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .dot { color: var(--accent); }
+  .logo img {
+    height: 34px;
+    width: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+  .logo .year-badge {
+    font-size: 0.7rem; color: var(--muted);
+    font-weight: 400; margin-left: 6px;
+  }
+  .lang-switcher select {
+    background: var(--bg-alt); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 0.85rem;
+    cursor: pointer; outline: none; font-family: inherit;
+    transition: border-color .2s;
+  }
+  .lang-switcher select:hover,
+  .lang-switcher select:focus { border-color: var(--accent); }
+  .back-btn {
+    padding: 8px 16px; background: var(--bg-alt);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-size: 0.88rem;
+    transition: all .2s; white-space: nowrap;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+
+  main { max-width: 780px; margin: 0 auto; padding: 60px 24px 80px; }
+
+  .hero-about {
+    text-align: center;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .hero-about h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    background: linear-gradient(120deg, #58a6ff, #7ee787);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero-about p {
+    color: var(--muted); font-size: 1.05rem;
+    max-width: 600px; margin: 0 auto;
+  }
+
+  article h2 {
+    font-size: 1.35rem; color: var(--accent-2);
+    margin: 40px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  article h3 {
+    font-size: 1rem; color: var(--accent);
+    margin: 22px 0 8px;
+  }
+  article p { margin-bottom: 12px; color: var(--text); }
+  article ul, article ol { padding-left: 1.4em; margin-bottom: 14px; }
+  article li { margin-bottom: 6px; color: var(--muted); }
+  article li strong { color: var(--text); }
+
+  .pipeline {
+    display: flex; flex-direction: column; gap: 12px;
+    margin: 20px 0;
+  }
+  .pipeline-step {
+    display: flex; gap: 16px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .pipeline-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent); color: #0d1117;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem;
+  }
+  .pipeline-text { flex: 1; }
+  .pipeline-text strong { display: block; margin-bottom: 4px; }
+  .pipeline-text p { font-size: 0.9rem; color: var(--muted); margin: 0; }
+
+  .callout {
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent-2);
+    background: rgba(126, 231, 135, 0.06);
+    border-radius: 0 10px 10px 0;
+    margin: 18px 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+  .callout strong { color: var(--accent-2); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 560px) {
+    .nav { flex-wrap: wrap; gap: 10px; }
+    .logo { font-size: 1.1rem; }
+    .logo .year-badge { display: none; }
+  }

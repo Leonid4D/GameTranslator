@@ -1,0 +1,17 @@
+[
+  { "game": "Cyberpunk 2077", "object": "Johnny Silverhand", "lang": "ru", "expect": ["сильверхенд"] },
+  { "game": "The Witcher 3", "object": "Geralt of Rivia", "lang": "ru", "expect": ["геральт из ривии", "геральт"] },
+  { "game": "Fallout 3", "object": "Vault 101", "lang": "ru", "expect": ["убежище 101"] },
+  { "game": "Fallout 4", "object": "Vault 111", "lang": "ru", "expect": ["убежище 111"] },
+  { "game": "Minecraft", "object": "Creeper", "lang": "ru", "expect": ["крипер"] },
+  { "game": "Minecraft", "object": "Diamond Sword", "lang": "ru", "expect": ["алмазный меч"] },
+  { "game": "Half-Life 2", "object": "Gravity Gun", "lang": "ru", "expect": ["гравитационная пушка", "гравипушка"] },
+  { "game": "Portal 2", "object": "Companion Cube", "lang": "ru", "expect": ["кубик-компаньон", "кубик компаньон", "компаньон"] },
+  { "game": "Dark Souls", "object": "Bonfire", "lang": "ru", "expect": ["костёр", "костер"] },
+  { "game": "Elden Ring", "object": "Malenia", "lang": "ru", "expect": ["маления"] },
+  { "game": "Hollow Knight", "object": "Grimm", "lang": "ru", "expect": ["гримм"] },
+  { "game": "Skyrim", "object": "Whiterun", "lang": "ru", "expect": ["вайтран"] },
+  { "game": "BioShock", "object": "Big Daddy", "lang": "ru", "expect": ["биг дэдди", "большой папочка"] },
+  { "game": "Team Fortress 2", "object": "Spy", "lang": "ru", "expect": ["шпион"] },
+  { "game": "The Witcher 3", "object": "Silver Sword", "lang": "ru", "expect": ["серебряный меч"] }
+]

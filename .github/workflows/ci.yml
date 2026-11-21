@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check
+        run: npm run check
+
+      - name: Unit and API tests
+        run: npm test
+
+      - name: Netlify build
+        run: npm run build
+
+      - name: Upload static build
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-site
+          path: netlify-site/
+          retention-days: 7

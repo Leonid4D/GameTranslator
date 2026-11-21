@@ -3,6 +3,18 @@
 Адаптивный перевод игровых терминов: бэкенд собирает контекст из Fandom/Wikipedia
 и просит LLM объяснить, как термин переведён в разных локализациях.
 
+Что умеет сейчас:
+
+- **сравнение локализаций** — ответ модели приходит структурированным (`translations[]`):
+  официальный перевод, варианты, уверенность и пометка «подтверждено источником»;
+- **реальные источники** — ссылки на фандом/вики, по которым собирался контекст;
+- **автодополнение термина** из вики игры (MediaWiki opensearch);
+- **транслитерация** — «Ведьмак 3» находится на латинском поддомене `vedmak.fandom.com`;
+- **экспорт** результата в CSV (нормальная таблица для Excel), JSON и Markdown;
+- **светлая/тёмная тема**, доступность (Esc/фокус в модалках), PWA-манифест и SEO-метаданные;
+- **строгий CSP и санитайзер** разметки ответа — текст из интернета и ответ LLM не могут
+  выполнить скрипт в браузере.
+
 ## Быстрый старт
 
 Windows — двойной клик по `start.cmd` (см. раздел ниже). Вручную:
@@ -30,6 +42,23 @@ curl http://localhost:3000/api/health
 localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 ```
 
+## Тесты и демо-режим
+
+```bash
+npm test              # юнит-тесты и smoke-тесты API (без сети и без ключей)
+npm run check         # синтаксис server.js и фронтенд-скриптов
+npm run build         # сборка статики для Netlify (netlify-site/)
+npm run eval          # оценка качества перевода (нужен рабочий LLM_API_KEY)
+```
+
+`MOCK_LLM=1 npm start` — детерминированный демо-режим: LLM и внешние сервисы не
+вызываются, `/api/translate` отдаёт структурированный ответ-заглушку. Так интерфейс
+можно смотреть локально без ключей и расходов на модель.
+
+`npm run eval` прогоняет известные термины из `scripts/eval-golden.json` и печатает
+процент попаданий — удобно сравнивать промпты и модели (`--limit`, `--min` в аргументах).
+CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет синтаксис, тесты и сборку.
+
 ## Переменные окружения
 
 Файл `Keys.env` (приоритет) или `.env`. Полный список с комментариями — в `.env.example`.
@@ -47,16 +76,32 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 | `FRONTEND_ORIGIN` | Куда вернуть пользователя после оплаты |
 | `CORS_ORIGINS` | Белый список источников через запятую; пусто — разрешены все |
 | `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MS` | Ограничение запросов на IP |
+| `LLM_MAX_TOKENS` | Лимит длины ответа модели (по умолчанию 1600) |
+| `LLM_JSON_MODE` | `auto` (по умолчанию) / `on` / `off` — структурированный JSON-ответ |
+| `WEB_SEARCH_TIMEOUT_MS` | Сколько ждать веб-поиск, мс (по умолчанию 10000; на Netlify ставьте 3000–5000) |
+| `MOCK_LLM` | `1` — демо-режим без вызовов LLM и внешних сервисов |
+| `SUGGEST_ENABLED` | `0` отключает автодополнение терминов (`/api/suggest`) |
+| `LLM_DAILY_LIMIT` | Максимум LLM-запросов в сутки на инстанс (0 — без лимита) |
 
 ## API
 
 ### `GET /api/health`
 
 ```json
-{ "ok": true, "services": { "llm": true, "tavily": false, "yookassa": false }, "model": "deepseek-chat" }
+{
+  "ok": true,
+  "promptVersion": "v2-structured",
+  "mock": false,
+  "services": { "llm": true, "tavily": false, "yookassa": false },
+  "webSearch": { "provider": "auto", "fallback": "duckduckgo" },
+  "suggest": true,
+  "cache": { "entries": 0, "ttlSec": 1800 },
+  "dailyLlmLimit": 0,
+  "model": "deepseek-chat"
+}
 ```
 
-### `POST /api/translate`
+### `POST /api/translate` (есть и `GET` с теми же параметрами в query)
 
 ```json
 {
@@ -69,12 +114,64 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 }
 ```
 
-Ответ: `{ "answer": "…markdown…", "sources": [...], "meta": {...} }`.
+`targetLangs` принимает коды (`ru`, `de`) или названия (`Русский`, `Deutsch`) — код в
+ответе всегда нормализован. Ответ:
+
+```json
+{
+  "answer": "…markdown (таблица + пояснения)…",
+  "summary": "1–3 предложения общего вывода",
+  "translations": [
+    {
+      "lang": "ru",
+      "langName": "Русский",
+      "official": "Серебряный меч",
+      "alternatives": ["Серебряный клинок"],
+      "literal": null,
+      "explanation": "Почему так переведено",
+      "confidence": "high",
+      "verified": true,
+      "evidence": "vedmak.fandom.com — Silver Sword"
+    }
+  ],
+  "sources": [{ "title": "…", "url": "https://…", "source": "vedmak.fandom.com" }],
+  "meta": {
+    "model": "deepseek-chat",
+    "promptVersion": "v2-structured",
+    "usedWiki": true,
+    "usedWeb": false,
+    "webProvider": null,
+    "structured": true,
+    "verifiedCount": 1,
+    "latencyMs": 4200,
+    "usage": { "prompt_tokens": 1213, "completion_tokens": 552 }
+  }
+}
+```
+
+`verified` — проверка без участия модели: перевод встречается в тексте собранных
+источников. Если провайдер не поддерживает JSON-режим, сервер повторит запрос без
+`response_format`, и тогда придут только `answer` + `meta.structured: false`
+(клиент это поддерживает).
+
+Пример без тела:
+
+```bash
+curl "http://localhost:3000/api/translate?game=Fallout%203&object=Vault%20101&langs=ru,de"
+```
+
+### `GET /api/suggest?q=…&game=…`
+
+Автодополнение терминов из вики игры (MediaWiki opensearch, фолбэк — Wikipedia).
+Отдаёт до 6 подсказок: `{ "provider": "fandom", "suggestions": [{ "title", "url", "snippet", "source" }] }`.
+Кэшируется на 10 минут, отключается через `SUGGEST_ENABLED=0`.
 
 ### `POST /api/proxy-translate`
 
 Загружает чужую страницу и отдаёт её HTML для показа в iframe. Требует `userTier >= 2`.
-Локальные и служебные адреса блокируются (защита от SSRF), порты — только 80/443.
+Локальные и служебные адреса блокируются (SSRF), порты — только 80/443, каждый
+редирект проверяется заново. Из HTML удаляются скрипты, inline-обработчики и
+`javascript:`-ссылки; iframe на клиенте открывается с `sandbox`.
 
 ### `POST /api/create-payment`
 
@@ -82,8 +179,10 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 { "plan": "premium" }
 ```
 
-Тарифы: `premium` (299 ₽), `premium_plus` (599 ₽), `premium_plus_plus` (999 ₽).
-Возвращает `confirmation_url` из ЮKassa. Без ключей — 503 с понятным текстом.
+Тарифы: `premium` (349 ₽), `premium_plus` (699 ₽), `premium_plus_plus` (1290 ₽) —
+цены синхронизированы с витриной в `index.html`.
+Возвращает `confirmation_url` из ЮKassa. Фронтенд сам пробует создать платёж и
+уводит на оплату; если ключей нет (503) — включает демо-режим и честно сообщает об этом.
 
 ## Что важно знать
 
@@ -106,12 +205,38 @@ localStorage.setItem('gtApiBase', 'https://ваш-бэкенд.example.com');
 ## Структура
 
 ```
-server.js       — Express-приложение (API, LLM, кэш контекста)
-index.html      — интерфейс (одностраничный, без сборки)
-about.html      — страница «О проекте»
-Keys.env        — секреты (в git не попадает)
-.env.example    — шаблон настроек
+server.js                  — Express-приложение: API, LLM, контекст, безопасность
+assets/app.js              — логика интерфейса (тема, поиск, рендер, экспорт)
+assets/style.css           — стили интерфейса, светлая/тёмная тема
+assets/vendor/             — локальные marked.min.js и purify.min.js (без CDN)
+assets/about.css, about.js — страница «О проекте»
+index.html                 — разметка главной
+about.html                 — страница «О проекте»
+tests/                     — node:test: юниты, smoke API, проверки фронтенда
+scripts/eval.js            — оценка качества перевода на эталонном наборе
+scripts/eval-golden.json   — эталонные термины для eval
+netlify/build.js           — сборка статики в netlify-site/
+netlify/functions/api.js   — serverless-обёртка Express-приложения
+_headers                   — CSP и security-заголовки для Netlify
+manifest.json, robots.txt, sitemap.xml — PWA и SEO
+Keys.env                   — секреты (в git не попадает)
+.env.example               — шаблон настроек
 ```
+
+## Безопасность
+
+- **CSP и security-заголовки** (`_headers` публикуются вместе со статикой): скрипты
+  только со своего origin, inline-обработчиков `onclick` в разметке больше нет.
+- **Санитайзер ответа** — markdown от LLM рендерится через marked и чистится DOMPurify
+  (вендорные копии в `assets/vendor/`). В промпт попадает текст из интернета, поэтому
+  ответ модели считается недоверенным.
+- **SSRF в прокси-переводе**: адрес и каждый редирект проверяются `assertPublicUrl`,
+  приватные диапазоны (включая IPv6, NAT64/6to4), нестандартные порты и внутренние
+  домены блокируются; из чужого HTML вырезаются скрипты и обработчики.
+- **Ограничение расходов**: `max_tokens`, суточный лимит `LLM_DAILY_LIMIT`, rate limit
+  на IP, кэш контекста и веб-поиска.
+- **Кэш на клиенте** учитывает языки, стиль, Pro-режим и глоссарий — ответ для одного
+  набора языков больше не подменяет другой.
 
 ## Запуск на Windows (в один клик)
 
@@ -203,9 +328,14 @@ netlify login
 # после любых изменений в коде/интерфейсе:
 deploy.cmd
 # или вручную:
-node netlify/build.js
+npm run build
 netlify deploy --prod --dir=netlify-site --functions=netlify/functions --no-build
 ```
+
+Сборка копирует в `netlify-site/` не только HTML и логотип, но и `assets/`
+(стили, скрипты, вендорные библиотеки), `manifest.json`, `robots.txt`,
+`sitemap.xml` и `_headers` — из последнего Netlify берёт CSP и security-заголовки.
+Если какой-то файл забыт, сборка падает с понятной ошибкой, а не публикует битый сайт.
 
 `git push` сам деплой НЕ запускает (проект не привязан к Git). Привязать
 репозиторий можно в панели: Project configuration → Build & deploy →
@@ -225,9 +355,10 @@ Access & security → снять «Require SSO», либо через API
 `PATCH /api/v1/sites/<site_id>` с телом `{"sso_login": false}`.
 
 Ограничения free-тарифа: функция живёт максимум ~10 секунд на запрос — обычный
-перевод идёт 2–6 с, но самый долгий Pro-запрос может упереться в лимит (поэтому
-советуем `LLM_TIMEOUT_MS=9000`: тогда вернётся аккуратная ошибка 504, а не 502 от
-Netlify). Лимиты — 100 ГБ трафика и 125 000 вызовов функций в месяц.
+перевод идёт 2–6 с, но самый долгий Pro-запрос может упереться в лимит. Поэтому
+на Netlify советуем `LLM_TIMEOUT_MS=9000` (аккуратная ошибка 504 вместо 502 от
+Netlify) и `WEB_SEARCH_TIMEOUT_MS=3000–5000`, чтобы веб-поиск успевал завершиться
+внутри бюджета функции. Лимиты — 100 ГБ трафика и 125 000 вызовов функций в месяц.
 
 Сайт с GitHub Pages тоже можно связать с Netlify (необязательно): в консоли на
 `leonid4d.github.io` выполнить
@@ -256,3 +387,42 @@ localStorage.setItem('gtApiBase', 'https://<имя>.onrender.com');
 и перезагрузить страницу. Бесплатный инстанс Render засыпает через ~15 минут
 простоя — первый запрос после паузы идёт 30–60 секунд (можно пинговать
 `/api/health` внешним cron-сервисом).
+
+## Изменения версии 1.1
+
+**Интерфейс**
+
+- CSS и JS вынесены из `index.html` в `assets/`; `marked` и `DOMPurify` лежат
+  локально в `assets/vendor/` (раньше интерфейс падал целиком, если CDN недоступен).
+- Ответ модели приходит структурированным: таблица сравнения локализаций с
+  официальным переводом, вариантами, уверенностью и пометкой «подтверждено источником»,
+  кнопка копирования у каждой строки.
+- Источники теперь настоящие (ссылки на фандом/вики), а не демо-заглушки.
+- Экспорт результата в CSV (таблица для Excel), JSON и Markdown; кнопка «Поделиться».
+- Состояние запроса живёт в URL: языки, стиль и Pro-режим восстанавливаются из ссылки.
+- Кэш учитывает языки, стиль, Pro-режим и глоссарий; старые записи совместимы.
+- Автодополнение термина (Fandom/Wikipedia), транслитерация кириллицы для поиска
+  латинских вики-слогов (`Ведьмак 3` → `vedmak.fandom.com`).
+- Светлая/тёмная тема с учётом системной настройки; меню, модалки и подсказки
+  закрываются по Esc; `aria`-атрибуты и фокус; уведомления вместо `alert`.
+- Русский интерфейс по умолчанию; недостающие строки переводов подставляются из английского.
+- PWA-манифест, Open Graph/Twitter-мета, JSON-LD, `robots.txt` и `sitemap.xml`.
+
+**Бэкенд**
+
+- JSON-режим модели с автоматическим фолбэком на markdown, `max_tokens`, повтор на
+  временных ошибках, `MOCK_LLM` для тестов и демо, суточный лимит LLM.
+- `GET /api/translate` (для curl и встраивания), `/api/suggest` (автодополнение).
+- Проверка источников без модели: `verified` / `evidence` в каждой строке ответа.
+- Заголовки безопасности для API, ограничение размера ответа, `no-store` для `/api/*`.
+- Прокси-перевод: ручная обработка редиректов с повторной SSRF-проверкой, вырезание
+  скриптов/inline-обработчиков, `sandbox` у iframe.
+- Цены тарифов синхронизированы с витриной (349/699/1290 ₽).
+- `LICENSE` MIT и `package.json` больше не расходятся.
+
+**Инфраструктура**
+
+- `npm test` — 43 теста (`node:test`): юниты, smoke API в mock-режиме, проверки фронтенда.
+- `npm run check`, `npm run build`, `npm run eval`; CI на GitHub Actions.
+- `netlify/build.js` копирует `assets/` и статические файлы, валидирует сборку.
+- README и `.env.example` обновлены под новые переменные.

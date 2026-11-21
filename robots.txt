@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://game-translator-leonid.netlify.app/sitemap.xml
