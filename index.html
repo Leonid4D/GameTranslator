@@ -2174,6 +2174,11 @@ async function searchTerm(forceRefresh = false) {
     }
 
     if (!response.ok) {
+      // На опубликованном сайте (GitHub Pages) бэкенда нет: запрос /api/* отдаёт HTML-404.
+      if (!API_BASE && (response.status === 404 || response.status === 405) && !data) {
+        throw new Error('Бэкенд не подключён. Поднимите сервер (Render/VPS) и выполните в консоли браузера: ' +
+          'localStorage.setItem("gtApiBase", "https://адрес-бэкенда")');
+      }
       throw new Error(data && data.error ? data.error : `Сервер ответил ${response.status}.`);
     }
     if (!data || !data.answer) {
