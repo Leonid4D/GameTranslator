@@ -342,9 +342,17 @@
     if (action.type === 'propose_edit') {
       card.classList.add('gtchat__card--edit');
       card.appendChild(el('p', 'gtchat__card-title', t('chat_edit_proposed') + ' · ' + langName(action.lang)));
+      const now = action.official || (action.alternatives && action.alternatives[0]) || '—';
+      // После применения карточка становится отметкой: повторять нечего.
+      if (state.applied) {
+        const applied = el('p', 'gtchat__diff');
+        applied.appendChild(el('span', 'gtchat__diff-now', now));
+        card.appendChild(applied);
+        card.appendChild(el('p', 'gtchat__note', t('chat_applied')));
+        return card;
+      }
       const row = rowByLang(action.lang);
       const was = row && row.official ? row.official : '—';
-      const now = action.official || (action.alternatives && action.alternatives[0]) || '—';
       const diff = el('p', 'gtchat__diff');
       diff.appendChild(el('span', 'gtchat__diff-was', was));
       diff.appendChild(el('span', 'gtchat__diff-arrow', ' → '));
@@ -356,10 +364,6 @@
       if (action.explanation) card.appendChild(el('p', 'gtchat__note', action.explanation));
       card.appendChild(el('span', 'badge badge-unverified gtchat__badge', t('chat_unverified')));
 
-      if (state.applied) {
-        card.appendChild(el('p', 'gtchat__note', t('chat_applied')));
-        return card;
-      }
       if (isReadOnly()) {
         card.appendChild(el('p', 'gtchat__note', state.stale ? t('chat_stale') : t('chat_readonly_after_apply')));
         return card;
