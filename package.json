@@ -1,16 +1,17 @@
 {
   "name": "game-translator",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Adaptive game translation: wiki context + LLM comparison of game localizations",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "check": "node --check server.js && node --check assets/app.js && node --check assets/about.js",
+    "check": "node --check server.js && node --check assets/app.js && node --check assets/chat.js && node --check assets/about.js",
     "test": "node --test tests/",
     "eval": "node scripts/eval.js",
     "build": "node netlify/build.js",
-    "tavily:check": "node check-tavily.js"
+    "tavily:check": "node check-tavily.js",
+    "chat:redteam": "node scripts/chat-injection-eval.js"
   },
   "engines": {
     "node": ">=18"

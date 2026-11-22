@@ -49,6 +49,7 @@ npm test              # юнит-тесты и smoke-тесты API (без се
 npm run check         # синтаксис server.js и фронтенд-скриптов
 npm run build         # сборка статики для Netlify (netlify-site/)
 npm run eval          # оценка качества перевода (нужен рабочий LLM_API_KEY)
+npm run chat:redteam  # red-team мини-чата на живой модели (нужен рабочий LLM_API_KEY)
 ```
 
 `MOCK_LLM=1 npm start` — детерминированный демо-режим: LLM и внешние сервисы не
@@ -82,6 +83,11 @@ CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет с�
 | `MOCK_LLM` | `1` — демо-режим без вызовов LLM и внешних сервисов |
 | `SUGGEST_ENABLED` | `0` отключает автодополнение терминов (`/api/suggest`) |
 | `LLM_DAILY_LIMIT` | Максимум LLM-запросов в сутки на инстанс (0 — без лимита) |
+| `CHAT_ENABLED` | `0` — полностью выключить мини-чат (kill-switch) |
+| `CHAT_SIGNING_KEY` | Секрет подписи сессии чата, ≥32 символа. **Без него в production чат выключен** (fail-closed). Сгенерировать: `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
+| `CHAT_RATE_MAX`, `CHAT_RATE_WINDOW_MS` | Лимит сообщений чата: по умолчанию 12 в минуту на IP |
+| `CHAT_DAILY_PER_IP` | Дневной лимит сообщений чата на IP (по умолчанию 150; 0 — без лимита) |
+| `CHAT_MAX_TOKENS`, `CHAT_TIMEOUT_MS` | Лимит ответа и таймаут чата (700 токенов / 8 с — под serverless Netlify) |
 
 ## API
 
@@ -95,6 +101,7 @@ CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет с�
   "services": { "llm": true, "tavily": false, "yookassa": false },
   "webSearch": { "provider": "auto", "fallback": "duckduckgo" },
   "suggest": true,
+  "chat": { "enabled": true, "promptVersion": "v1-chat", "signingKey": true },
   "cache": { "entries": 0, "ttlSec": 1800 },
   "dailyLlmLimit": 0,
   "model": "deepseek-chat"
@@ -135,6 +142,8 @@ CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет с�
     }
   ],
   "sources": [{ "title": "…", "url": "https://…", "source": "vedmak.fandom.com" }],
+  "chat": true,
+  "chatToken": "eyJ2IjoxLCJnYW1lIjoi….<hmac>",
   "meta": {
     "model": "deepseek-chat",
     "promptVersion": "v2-structured",
@@ -143,11 +152,16 @@ CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет с�
     "webProvider": null,
     "structured": true,
     "verifiedCount": 1,
+    "chat": true,
     "latencyMs": 4200,
     "usage": { "prompt_tokens": 1213, "completion_tokens": 552 }
   }
 }
 ```
+
+`chatToken` — HMAC-подпись результата для мини-чата (TTL 30 минут, привязан к хешу
+строк перевода). Если чат выключен (`CHAT_ENABLED=0`) или нет ключа подписи, поля
+`chat`/`chatToken` = `false`/`null`, и клиент не рисует кнопку чата.
 
 `verified` — проверка без участия модели: перевод встречается в тексте собранных
 источников. Если провайдер не поддерживает JSON-режим, сервер повторит запрос без
@@ -159,6 +173,65 @@ CI (`.github/workflows/ci.yml`) на каждый push/PR проверяет с�
 ```bash
 curl "http://localhost:3000/api/translate?game=Fallout%203&object=Vault%20101&langs=ru,de"
 ```
+
+### `POST /api/chat` — мини-чат по результату перевода
+
+Чат привязан к одному результату, не имеет tools, доступа к сети и состояния на
+сервере. Модель возвращает только текст и до 3 предложений-действий
+(`answer`, `propose_edit`, `refine_query`, `glossary_add`); ничего не применяется
+автоматически — только по кнопке пользователя.
+
+```json
+{
+  "chatToken": "eyJ2IjoxLCJnYW1lIjoi….<hmac>",
+  "message": "Почему «Сильверхенд», а не «Серебряная рука»?",
+  "history": [{ "role": "user", "content": "Это официальный перевод?" }],
+  "rows": [
+    { "lang": "ru", "official": "Джонни Сильверхенд", "alternatives": [], "confidence": "high", "verified": true }
+  ]
+}
+```
+
+Ответ:
+
+```json
+{
+  "reply": "«Сильверхенд» — транслитерация фамилии…",
+  "actions": [
+    {
+      "type": "propose_edit",
+      "lang": "ru",
+      "official": "Джонни Сильверхенд",
+      "alternatives": ["Джонни Среброрук"],
+      "explanation": "…",
+      "confidence": "high",
+      "verified": false,
+      "source": "model"
+    }
+  ],
+  "meta": { "model": "deepseek-chat", "promptVersion": "v1-chat", "latencyMs": 2100, "blocked": false, "rejectedActions": 0 }
+}
+```
+
+Коды ошибок:
+
+| Код | Значение |
+|---|---|
+| 401 `chat_token_invalid` / `chat_token_expired` | Токена нет, подпись неверна или истекли 30 минут — нужно обновить результат |
+| 409 `chat_rows_mismatch` | Строки результата изменились (подмена или применённая правка) — обновите результат |
+| 400 `chat_message_too_long` / `chat_history_too_long` / `chat_message_empty` | Сообщение >1000 символов, история >8 сообщений/6000 символов, пустое сообщение |
+| 429 `chat_rate_limit` / `chat_daily_limit` / `chat_daily_limit_global` | 12/мин, 150/сутки на IP или общий суточный бюджет LLM |
+| 503 `chat_disabled` / `chat_signing_key_missing` | Чат выключен флагом или на сервере нет `CHAT_SIGNING_KEY` |
+| 504 `chat_timeout` | Модель не ответила за 8 секунд |
+
+```bash
+curl -X POST http://localhost:3000/api/chat -H "Content-Type: application/json" \
+  -d '{"chatToken":"…","message":"Почему так?","rows":[{…}]}'
+```
+
+Red-team проверка на живой модели: `npm run chat:redteam` (см.
+`scripts/chat-injection-eval.js`). Корпус атак и слои защиты подробно описаны в
+[docs/mini-chat-proposal.md](docs/mini-chat-proposal.md).
 
 ### `GET /api/suggest?q=…&game=…`
 
@@ -207,6 +280,7 @@ curl "http://localhost:3000/api/translate?game=Fallout%203&object=Vault%20101&la
 ```
 server.js                  — Express-приложение: API, LLM, контекст, безопасность
 assets/app.js              — логика интерфейса (тема, поиск, рендер, экспорт)
+assets/chat.js             — мини-чат: безопасный рендер, действия, stale-режим
 assets/style.css           — стили интерфейса, светлая/тёмная тема
 assets/vendor/             — локальные marked.min.js и purify.min.js (без CDN)
 assets/about.css, about.js — страница «О проекте»
@@ -215,6 +289,8 @@ about.html                 — страница «О проекте»
 tests/                     — node:test: юниты, smoke API, проверки фронтенда
 scripts/eval.js            — оценка качества перевода на эталонном наборе
 scripts/eval-golden.json   — эталонные термины для eval
+scripts/chat-injection-eval.js — red-team мини-чата на живой модели
+docs/mini-chat-proposal.md — предложение по чату: модель угроз AI Injection и защита
 netlify/build.js           — сборка статики в netlify-site/
 netlify/functions/api.js   — serverless-обёртка Express-приложения
 _headers                   — CSP и security-заголовки для Netlify
@@ -237,6 +313,13 @@ Keys.env                   — секреты (в git не попадает)
   на IP, кэш контекста и веб-поиска.
 - **Кэш на клиенте** учитывает языки, стиль, Pro-режим и глоссарий — ответ для одного
   набора языков больше не подменяет другой.
+- **Мини-чат не имеет привилегий**: у модели нет tools, доступа к сети и серверного
+  состояния; контекст результата доверяется только после проверки HMAC-подписи
+  `chatToken` и хеша строк (подмена → 409). Вывод модели — недоверенный JSON: белый
+  список из 4 действий, обрезка длин, вырезание HTML/Markdown/URL, детект canary-строки.
+  Правка применяется только кнопкой пользователя; ответ рендерится как plain text
+  (`textContent`), markdown в чате отключён. История и токен живут только в памяти.
+  Токен чата вырезается из клиентского кэша (`cacheSafeData`).
 
 ## Запуск на Windows (в один клик)
 
@@ -426,3 +509,53 @@ localStorage.setItem('gtApiBase', 'https://<имя>.onrender.com');
 - `npm run check`, `npm run build`, `npm run eval`; CI на GitHub Actions.
 - `netlify/build.js` копирует `assets/` и статические файлы, валидирует сборку.
 - README и `.env.example` обновлены под новые переменные.
+
+## Изменения версии 1.2 (мини-чат)
+
+**Возможности**
+
+- Кнопка **«Обсудить перевод»** в шапке результата и **«Уточнить»** у каждой строки
+  таблицы: диалог с моделью ровно об этом переводе. Дровер на десктопе, bottom sheet
+  на мобильном; страница при этом остаётся видимой.
+- Модель может объяснить перевод, предложить правку (diff «было → станет» с
+  пометкой «предложено моделью, не проверено источником»), предложить уточнить
+  запрос или добавить термин в глоссарий.
+- Правка меняет таблицу **только по кнопке «Применить»**, после этого чат становится
+  read-only до обновления результата; «Повторить поиск с уточнением» заполняет форму
+  и запускает поиск заново.
+
+| Десктоп | Мобильный |
+|---|---|
+| ![Мини-чат на десктопе](docs/screenshots/chat-desktop.png) | ![Мини-чат на мобильном](docs/screenshots/chat-mobile.png) |
+- Квоты: free 3 / Pro 20 / Premium+ 100 сообщений на результат — продуктовое
+  ограничение; реальные лимиты — 12/мин и 150/сутки на IP на сервере.
+- Кэш-хит открывает чат в stale-режиме с кнопкой «Обновить результат» (в кэше
+  токена нет — он там принципиально не хранится).
+
+**Безопасность (AI Injection)**
+
+- `chatToken`: HMAC-SHA256, TTL 30 минут, привязан к хешу строк результата; без
+  `CHAT_SIGNING_KEY` в production чат выключен (fail-closed).
+- У чата нет tools, function calling, сети и серверного состояния; контекст — только
+  структурированные поля результата и заголовки источников (raw-текст вики не передаётся).
+- Системный промпт — серверная константа с canary-строкой; клиентский текст уходит в
+  блоки `<untrusted_*>`, попытка «закрыть» тег нейтрализуется.
+- Ответ модели: строгий JSON, белый список 4 действий, обрезка длин, вырезание
+  HTML/Markdown/URL/картинок, детект canary (утечка → блокировка и security-лог).
+- Валидация на сервере: неизвестные действия и поля отбрасываются и логируются;
+  повторное использование подделанных/просроченных токенов и чужих строк — 401/409.
+- Противодействие злоупотреблениям: сообщения ≤1000 символов, история ≤8 сообщений
+  и 6000 символов, ответ ≤700 токенов / 2000 символов, лимиты на IP, общий дневной
+  бюджета LLM, `CHAT_ENABLED=0` как kill-switch.
+
+**Инфраструктура**
+
+- `npm test` — 84 теста: +30 тестов чата (контракт, токен, валидация действий,
+  canary, XSS, подмена строк, история, лимиты) и +10 статических проверок фронтенда
+  (запрет `innerHTML`, markdown, ссылок/картинок из ответа, версии ассетов, CSP).
+- `npm run chat:redteam` — red-team по живому API (`scripts/chat-injection-eval.js`):
+  override инструкций, prompt leak, canary, HTML/XSS, markdown-эксфильтрация,
+  `javascript:`-ссылки, подделка действий, отравление истории, bidi, jailbreak,
+  транспортные проверки и уровень false-refusal.
+- Документ с моделью угроз и слоями защиты: `docs/mini-chat-proposal.md`.
+- Версия 1.2.0; ассеты подключены с `?v=`, `/assets/*` отдаются с `must-revalidate`.

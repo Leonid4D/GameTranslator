@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="logo.png">
 <script src="assets/vendor/marked.min.js?v=1.1.1"></script>
 <script src="assets/vendor/purify.min.js?v=1.1.1"></script>
-<link rel="stylesheet" href="assets/style.css?v=1.1.1">
+<link rel="stylesheet" href="assets/style.css?v=1.2.0">
 
 <script type="application/ld+json">
 {
@@ -268,6 +268,36 @@
       <p data-i18n="loading">🧠 Нейросеть анализирует вики и интернет…</p>
     </div>
     <div id="answerBox" class="answer-box" aria-live="polite"></div>
+
+    <!-- Мини-чат «Обсудить перевод». Ответ модели рендерится только текстом,
+         правки применяются исключительно кнопкой (assets/chat.js). -->
+    <div id="gtchat" class="gtchat" hidden>
+      <div class="gtchat__backdrop" data-chat-close></div>
+      <aside class="gtchat__panel" role="dialog" aria-modal="false" aria-labelledby="gtchatTitle" aria-describedby="gtchatHint">
+        <header class="gtchat__head">
+          <div class="gtchat__head-text">
+            <h2 id="gtchatTitle" class="gtchat__title" data-i18n="chat_title">Обсуждение перевода</h2>
+            <p id="gtchatContext" class="gtchat__context"></p>
+          </div>
+          <button type="button" class="gtchat__close" data-chat-close aria-label="Закрыть чат" data-i18n-aria-label="chat_close">✕</button>
+        </header>
+        <p id="gtchatHint" class="gtchat__hint" data-i18n="chat_hint">Чат знает только этот результат. Правки не применяются автоматически.</p>
+        <div id="gtchatLog" class="gtchat__log" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <p id="gtchatStatus" class="gtchat__status" role="status" aria-live="polite"></p>
+        <form id="gtchatForm" class="gtchat__form" autocomplete="off">
+          <label class="gtchat__field">
+            <span class="gtchat__visually-hidden" data-i18n="chat_input_label">Сообщение для нейросети</span>
+            <textarea id="gtchatInput" class="gtchat__input" rows="2" maxlength="1000" placeholder="Почему так переведено?" aria-label="Сообщение для нейросети" data-i18n-placeholder="chat_placeholder" data-i18n-aria-label="chat_input_label"></textarea>
+          </label>
+          <button type="submit" id="gtchatSend" class="btn-primary gtchat__send" data-i18n="chat_send">Отправить</button>
+        </form>
+        <div class="gtchat__foot">
+          <span id="gtchatQuota" class="gtchat__quota"></span>
+          <button type="button" id="gtchatRefresh" class="gtchat__refresh" hidden data-i18n="chat_refresh">Обновить результат</button>
+        </div>
+        <p class="gtchat__disclaimer" data-i18n="chat_disclaimer">Чат не меняет перевод сам: правка применится только по кнопке. Официальность перевода не гарантируется.</p>
+      </aside>
+    </div>
   </div>
 </section>
 
@@ -562,6 +592,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=1.1.1"></script>
+<script src="assets/chat.js?v=1.2.0"></script>
+<script src="assets/app.js?v=1.2.0"></script>
 </body>
 </html>

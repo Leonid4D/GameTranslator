@@ -41,7 +41,7 @@ for (const file of copies) copyFile(file);
 copyDirectory(path.join(root, 'assets'), path.join(out, 'assets'));
 
 // Проверяем, что фронтенд не ссылается на несуществующие файлы.
-const assetPaths = ['assets/style.css', 'assets/app.js', 'assets/about.css', 'assets/about.js', 'assets/vendor/marked.min.js', 'assets/vendor/purify.min.js'];
+const assetPaths = ['assets/style.css', 'assets/app.js', 'assets/chat.js', 'assets/about.css', 'assets/about.js', 'assets/vendor/marked.min.js', 'assets/vendor/purify.min.js'];
 const missing = assetPaths.filter((file) => !fs.existsSync(path.join(out, file)));
 if (missing.length > 0) {
     console.error('[build] ОШИБКА: в сборке нет файлов: ' + missing.join(', '));

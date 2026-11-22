@@ -1175,3 +1175,152 @@
     .logo { font-size: 1.15rem; }
     .logo .year-badge { display: none; }
   }
+
+  /* =========================================================
+     МИНИ-ЧАТ «ОБСУДИТЬ ПЕРЕВОД»
+     Слой 940 — между баннером (900) и модалками (1000), тост (1100) выше.
+     ========================================================= */
+  .gtchat[hidden] { display: none !important; }
+  .gtchat { position: fixed; inset: 0; z-index: 940; pointer-events: none; }
+  .gtchat__backdrop { display: none; }
+  .gtchat__panel {
+    pointer-events: auto;
+    position: absolute;
+    top: 0; right: 0;
+    width: clamp(360px, 30vw, 420px);
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.35);
+    transform: translateX(100%);
+    transition: transform .22s ease;
+  }
+  .gtchat--open .gtchat__panel { transform: none; }
+  .gtchat__head { display: flex; align-items: flex-start; gap: 12px; }
+  .gtchat__head-text { min-width: 0; flex: 1 1 auto; }
+  .gtchat__title { font-size: 1.02rem; line-height: 1.3; }
+  .gtchat__context { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+  .gtchat__close {
+    flex: 0 0 auto; width: 34px; height: 34px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg-alt); color: var(--text);
+    font-size: 1rem; cursor: pointer; font-family: inherit;
+  }
+  .gtchat__close:hover { color: var(--accent); }
+  .gtchat__hint { color: var(--muted); font-size: 0.78rem; line-height: 1.45; }
+  .gtchat__log {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 2px 8px;
+  }
+  .gtchat__msg { max-width: 96%; border-radius: 10px; padding: 9px 12px; }
+  .gtchat__msg--user { align-self: flex-end; background: rgba(88, 166, 255, 0.16); border: 1px solid rgba(88, 166, 255, 0.35); }
+  .gtchat__msg--assistant { align-self: flex-start; background: var(--bg-alt); border: 1px solid var(--border); }
+  .gtchat__text { font-size: 0.88rem; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .gtchat__empty { color: var(--muted); font-size: 0.86rem; display: flex; flex-direction: column; gap: 8px; padding: 6px 2px; }
+  .gtchat__empty-title { color: var(--text); font-weight: 600; font-size: 0.94rem; }
+  .gtchat__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .gtchat__chip {
+    border: 1px solid var(--border); border-radius: 999px;
+    background: var(--bg-alt); color: var(--text);
+    padding: 6px 12px; font-size: 0.8rem; cursor: pointer; font-family: inherit;
+  }
+  .gtchat__chip:hover { border-color: var(--accent); color: var(--accent); }
+  .gtchat__card {
+    margin-top: 8px; padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .gtchat__card-title { font-size: 0.82rem; font-weight: 700; }
+  .gtchat__diff { font-size: 0.85rem; overflow-wrap: anywhere; }
+  .gtchat__diff-was { color: var(--muted); text-decoration: line-through; }
+  .gtchat__diff-arrow { color: var(--muted); }
+  .gtchat__diff-now { color: var(--accent-2); font-weight: 600; }
+  .gtchat__alts { color: var(--muted); font-size: 0.8rem; overflow-wrap: anywhere; }
+  .gtchat__note { color: var(--muted); font-size: 0.78rem; line-height: 1.45; overflow-wrap: anywhere; }
+  .gtchat__badge { align-self: flex-start; }
+  .badge-unverified {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 600;
+    color: #d29922; background: rgba(210, 153, 34, 0.14);
+    border: 1px solid rgba(210, 153, 34, 0.4);
+  }
+  .gtchat__card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .btn-small { padding: 6px 14px !important; font-size: 0.82rem !important; }
+  .gtchat__status { min-height: 18px; font-size: 0.78rem; color: var(--muted); }
+  .gtchat__status--warn { color: #d29922; }
+  .gtchat__status--error { color: var(--danger); }
+  .gtchat__form { display: flex; gap: 8px; align-items: flex-end; }
+  .gtchat__field { flex: 1 1 auto; min-width: 0; }
+  .gtchat__visually-hidden {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .gtchat__input {
+    width: 100%; resize: none;
+    padding: 9px 11px;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 0.88rem; line-height: 1.4;
+  }
+  .gtchat__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .gtchat__input:disabled { opacity: 0.6; }
+  .gtchat__send { flex: 0 0 auto; padding: 8px 16px !important; font-size: 0.85rem !important; }
+  .gtchat__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .gtchat__quota { color: var(--muted); font-size: 0.76rem; }
+  .gtchat__quota--empty { color: #d29922; }
+  .gtchat__refresh { border: 0; background: none; color: var(--accent); font-size: 0.78rem; cursor: pointer; font-family: inherit; text-decoration: underline; padding: 0; }
+  .gtchat__disclaimer { color: var(--muted); font-size: 0.72rem; line-height: 1.4; }
+  .btn-row-chat { background: none; border: 0; cursor: pointer; font-size: 0.85rem; padding: 2px 4px; opacity: 0.7; font-family: inherit; }
+  .btn-row-chat:hover { opacity: 1; }
+  .btn-chat { border-color: var(--accent) !important; }
+
+  @media (max-width: 899px) {
+    .gtchat { pointer-events: auto; }
+    .gtchat__backdrop {
+      display: block; position: absolute; inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0; transition: opacity .2s ease;
+    }
+    .gtchat--open .gtchat__backdrop { opacity: 1; }
+    .gtchat__panel {
+      top: auto; bottom: 0; right: 0; left: 0;
+      width: 100%;
+      height: auto;
+      max-height: 85vh;
+      max-height: 85dvh;
+      border-left: 0;
+      border-top: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+    .gtchat--open .gtchat__panel { transform: none; }
+  }
+
+  @media (max-width: 480px) {
+    .gtchat__panel { max-height: 90dvh; padding: 14px 14px calc(12px + env(safe-area-inset-bottom, 0px)); }
+    .gtchat__form { flex-wrap: wrap; }
+    .gtchat__send { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gtchat__panel, .gtchat__backdrop { transition: none; }
+  }
+
+  @media print {
+    .gtchat { display: none !important; }
+  }

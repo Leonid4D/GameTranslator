@@ -216,7 +216,57 @@ const translations = {
     page_error_title: "Ошибка",
     premium_only_plus: "Доступно только с Premium+",
     cancel_sub_confirm: "Вы уверены, что хотите отменить подписку?",
-    random_term_btn: "🎲 Случайный термин"
+    random_term_btn: "🎲 Случайный термин",
+    // --- мини-чат «Обсудить перевод» ---
+    chat_open: "Обсудить перевод",
+    chat_row_hint: "Уточнить этот язык",
+    chat_title: "Обсуждение перевода",
+    chat_close: "Закрыть чат",
+    chat_hint: "Чат знает только этот результат. Правки не применяются автоматически.",
+    chat_placeholder: "Почему так переведено? Что именно вы имели в виду?",
+    chat_input_label: "Сообщение для нейросети",
+    chat_send: "Отправить",
+    chat_typing: "Нейросеть отвечает…",
+    chat_empty_title: "Обсудите этот перевод",
+    chat_empty_hint: "Спросите, почему вариант такой, или объясните, что именно вы имели в виду.",
+    chat_chip_why: "Почему так?",
+    chat_chip_why_text: "Почему официальный перевод именно такой?",
+    chat_chip_variant: "Другой вариант",
+    chat_chip_variant_text: "Предложи другой вариант перевода этого термина.",
+    chat_chip_wrong: "Я ошибся во вводе",
+    chat_chip_wrong_text: "Я, кажется, ошибся в названии игры или термина — давай уточним запрос.",
+    chat_quota: "Сообщений: {used} из {limit}",
+    chat_quota_limit: "Лимит сообщений для этого результата исчерпан",
+    chat_message_too_long: "Слишком длинное сообщение — сократите до 1000 символов",
+    chat_error_network: "Нет связи с сервером. Попробуйте ещё раз.",
+    chat_error_timeout: "Ответ не пришёл вовремя. Попробуйте ещё раз.",
+    chat_error_rate: "Слишком много запросов. Повторите через {sec} с.",
+    chat_error_generic: "Не удалось получить ответ. Попробуйте переформулировать.",
+    chat_refused_security: "Такой запрос я выполнить не могу. Давайте вернёмся к переводу.",
+    chat_stale: "Сессия чата истекла. Обновите результат, чтобы обсудить перевод.",
+    chat_session_expired: "Сессия чата истекла. Обновите результат.",
+    chat_refresh: "Обновить результат",
+    chat_edit_proposed: "Предложенная правка",
+    chat_alt_label: "Варианты",
+    chat_unverified: "предложено моделью, не проверено источником",
+    chat_verified: "проверено источником",
+    chat_action_apply: "Применить",
+    chat_action_dismiss: "Отклонить",
+    chat_action_glossary: "В глоссарий",
+    chat_action_refine: "Найти заново",
+    chat_applied: "Правка применена",
+    chat_readonly_after_apply: "Чтобы обсудить новую версию, обновите результат.",
+    chat_glossary_added: "Добавлено в глоссарий",
+    chat_glossary_limit: "В глоссарии уже 50 записей",
+    chat_disabled: "Чат сейчас недоступен",
+    chat_apply_failed: "Не удалось применить. Исходный перевод не изменён.",
+    chat_prefill_row: "Проверь перевод для языка {lang}: всё верно?",
+    chat_refine: "Уточнение запроса",
+    chat_refine_running: "Запускаю поиск с уточнением…",
+    chat_disclaimer: "Чат не меняет перевод сам: правка применится только по кнопке. Официальность перевода не гарантируется.",
+    game_label: "Игра",
+    term_label: "Термин",
+    subproject_label: "Подпроект"
   },
   en: {
     nav_about: "About", nav_features: "Features", nav_examples: "Examples", nav_contact: "Contact",
@@ -370,7 +420,57 @@ const translations = {
     page_error_title: "Error",
     premium_only_plus: "Available with Premium+ only",
     cancel_sub_confirm: "Are you sure you want to cancel the subscription?",
-    random_term_btn: "🎲 Random term"
+    random_term_btn: "🎲 Random term",
+    // --- mini chat «Discuss translation» ---
+    chat_open: "Discuss translation",
+    chat_row_hint: "Refine this language",
+    chat_title: "Discuss this translation",
+    chat_close: "Close chat",
+    chat_hint: "This chat knows only this result. Edits are never applied automatically.",
+    chat_placeholder: "Why is it translated this way? What did you mean?",
+    chat_input_label: "Message to the model",
+    chat_send: "Send",
+    chat_typing: "The model is replying…",
+    chat_empty_title: "Discuss this translation",
+    chat_empty_hint: "Ask why the version is like this, or explain what you actually meant.",
+    chat_chip_why: "Why this?",
+    chat_chip_why_text: "Why is the official translation like this?",
+    chat_chip_variant: "Another variant",
+    chat_chip_variant_text: "Suggest another translation for this term.",
+    chat_chip_wrong: "I made a mistake",
+    chat_chip_wrong_text: "I think I got the game or term wrong — let's refine the query.",
+    chat_quota: "Messages: {used} of {limit}",
+    chat_quota_limit: "Message limit for this result is reached",
+    chat_message_too_long: "Message is too long — keep it under 1000 characters",
+    chat_error_network: "No connection to the server. Try again.",
+    chat_error_timeout: "No answer in time. Try again.",
+    chat_error_rate: "Too many requests. Retry in {sec} s.",
+    chat_error_generic: "Could not get an answer. Try rephrasing.",
+    chat_refused_security: "I can't help with that request. Let's return to the translation.",
+    chat_stale: "Chat session expired. Refresh the result to discuss the translation.",
+    chat_session_expired: "Chat session expired. Refresh the result.",
+    chat_refresh: "Refresh result",
+    chat_edit_proposed: "Proposed edit",
+    chat_alt_label: "Alternatives",
+    chat_unverified: "proposed by the model, not verified by a source",
+    chat_verified: "verified by a source",
+    chat_action_apply: "Apply",
+    chat_action_dismiss: "Dismiss",
+    chat_action_glossary: "Add to glossary",
+    chat_action_refine: "Search again",
+    chat_applied: "Edit applied",
+    chat_readonly_after_apply: "Refresh the result to discuss the new version.",
+    chat_glossary_added: "Added to glossary",
+    chat_glossary_limit: "The glossary already has 50 entries",
+    chat_disabled: "Chat is temporarily unavailable",
+    chat_apply_failed: "Could not apply. The original translation is unchanged.",
+    chat_prefill_row: "Check the translation for {lang}: is it right?",
+    chat_refine: "Query refinement",
+    chat_refine_running: "Searching with the refinement…",
+    chat_disclaimer: "The chat never changes the translation itself: an edit is applied only by the button. Official status is not guaranteed.",
+    game_label: "Game",
+    term_label: "Term",
+    subproject_label: "Subproject"
   },
   es: {
     nav_about: "Acerca de", nav_features: "Funciones", nav_examples: "Ejemplos", nav_contact: "Contacto",
@@ -688,6 +788,19 @@ function applyLang(lang) {
     if (val !== undefined) el.placeholder = val;
   });
 
+  // a11y: подписи и подсказки кнопок тоже переводятся (используется чатом).
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.setAttribute('aria-label', val);
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    const val = (t[key] !== undefined) ? t[key] : fallback[key];
+    if (val !== undefined) el.title = val;
+  });
+
   // Кнопка поиска — сохраняем состояние «в процессе»
   if (searchBtn.disabled) {
     searchBtn.textContent = t.searching_btn;
@@ -709,6 +822,7 @@ function applyLang(lang) {
   uiLangSelect.value = lang;
   localStorage.setItem('uiLang', lang);
     if (typeof applyTosLang === 'function') applyTosLang();
+  if (window.GTChat && typeof window.GTChat.retranslate === 'function') window.GTChat.retranslate();
 }
 
 /* =========================================================
@@ -872,7 +986,7 @@ function renderMetaBadges(meta) {
   return chips.length ? `<div class="meta-badges">${chips.join('')}</div>` : '';
 }
 
-function renderComparisonTable(rows) {
+function renderComparisonTable(rows, chatAvailable = false) {
   const head =
     `<tr><th>${escapeHtml(tr('lang_col'))}</th>` +
     `<th>${escapeHtml(tr('official_col'))}</th>` +
@@ -909,7 +1023,13 @@ function renderComparisonTable(rows) {
         `<td data-label="${escapeHtml(tr('confidence_col'))}" class="badges-cell"><div class="badges">${confidence}${verified}</div></td>` +
         `<td class="copy-cell"><button type="button" class="btn-row-copy" data-copy-row="${escapeHtml(
           row.lang
-        )}" title="${escapeHtml(tr('copy_row'))}" aria-label="${escapeHtml(tr('copy_row'))}">⧉</button></td>` +
+        )}" title="${escapeHtml(tr('copy_row'))}" aria-label="${escapeHtml(tr('copy_row'))}">⧉</button>` +
+        (chatAvailable
+          ? `<button type="button" class="btn-row-chat" data-chat-row="${escapeHtml(row.lang)}" title="${escapeHtml(
+              tr('chat_row_hint')
+            )}" aria-label="${escapeHtml(tr('chat_row_hint'))}">💬</button>`
+          : '') +
+        `</td>` +
         `</tr>`
       );
     })
@@ -947,11 +1067,19 @@ function renderSources(sources) {
   return `<div class="sources-box"><h4>${escapeHtml(tr('sources_title'))}</h4><ul>${items}</ul></div>`;
 }
 
-function renderTools() {
-  const buttons = [
-    `<button class="btn-copy" data-copy>${escapeHtml(tr('copy_btn'))}</button>`,
-    `<button class="btn-copy" data-share>${escapeHtml(tr('share_btn'))}</button>`,
-  ];
+function renderTools(chatAvailable = false, chatFresh = false) {
+  const buttons = [];
+
+  // Чат: первая кнопка в тулбаре. Без свежего токена — stale-режим.
+  if (chatAvailable) {
+    buttons.push(
+      `<button class="btn-copy btn-chat" data-chat-open${chatFresh ? '' : ' data-chat-stale="1"'}>` +
+        `${escapeHtml(tr('chat_open'))}</button>`
+    );
+  }
+
+  buttons.push(`<button class="btn-copy" data-copy>${escapeHtml(tr('copy_btn'))}</button>`);
+  buttons.push(`<button class="btn-copy" data-share>${escapeHtml(tr('share_btn'))}</button>`);
 
   // Экспорт — платная функция, как и было; копирование и ссылка доступны всем.
   if (hasAccess(1)) {
@@ -978,10 +1106,14 @@ function renderResult(data, opts = {}) {
   }
 
   const summaryHtml = data.summary ? `<p class="answer-summary">${escapeHtml(data.summary)}</p>` : '';
-  const bodyHtml = rows ? renderComparisonTable(rows) : renderAnswerHTML(data.answer || '');
+  // Чат доступен, если сервер выдал chatToken (свежий ответ). У результата из
+  // кэша токен вырезан: кнопка показывается, но чат откроется в stale-режиме.
+  const chatAvailable = Boolean(data.chat) || Boolean(data.chatToken);
+  const chatFresh = Boolean(data.chatToken);
+  const bodyHtml = rows ? renderComparisonTable(rows, chatAvailable) : renderAnswerHTML(data.answer || '');
   const headerHtml =
     `<div class="answer-header"><h3>${escapeHtml(tr('result_title').replace('{obj}', object))}</h3>` +
-    `${renderTools()}</div>`;
+    `${renderTools(chatAvailable, chatFresh)}</div>`;
 
   answerBox.innerHTML =
     cacheHtml +
@@ -992,6 +1124,20 @@ function renderResult(data, opts = {}) {
     renderSources(data.sources);
 
   answerBox.style.display = 'block';
+
+  // Модуль чата получает актуальный результат и токен только через событие:
+  // это единственная точка интеграции, innerHTML чата не касается.
+  document.dispatchEvent(
+    new CustomEvent('gt-result', {
+      detail: {
+        data,
+        object,
+        chatToken: data.chatToken || null,
+        apiBase: API_BASE,
+        fromCache: Boolean(opts.fromCache),
+      },
+    })
+  );
 }
 
 // Ошибку показываем текстом (никакого innerHTML): сообщение приходит с сервера.
@@ -1002,6 +1148,7 @@ function renderError(message) {
   paragraph.textContent = `😕 ${message}`;
   answerBox.appendChild(paragraph);
   answerBox.style.display = 'block';
+  document.dispatchEvent(new CustomEvent('gt-result-clear'));
 }
 
 /* =========================================================
@@ -1362,10 +1509,19 @@ function loadCache(key) {
   } catch { return null; }
 }
 
+// Токен чата — доступ к подписанному контексту; в кэш он попадать не должен.
+function cacheSafeData(data) {
+  if (!data || typeof data !== 'object') return data;
+  const safe = Object.assign({}, data);
+  delete safe.chatToken;
+  return safe;
+}
+
 function saveCache(key, data) {
+  const safeData = cacheSafeData(data);
   try {
     const all = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-    all[key] = { data, ts: Date.now() };
+    all[key] = { data: safeData, ts: Date.now() };
 
     // Держим кэш компактным: localStorage не резиновый.
     const entries = Object.entries(all).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
@@ -1375,7 +1531,7 @@ function saveCache(key, data) {
     // Переполнили localStorage — чистим кэш и пробуем ещё раз.
     try {
       localStorage.removeItem(CACHE_KEY);
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ [key]: { data, ts: Date.now() } }));
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ [key]: { data: safeData, ts: Date.now() } }));
     } catch { /* ignore */ }
   }
 }
@@ -2140,6 +2296,31 @@ if (burgerBtn && navLinks) {
     navLinks.classList.toggle('active');
   });
 }
+/* =========================================================
+   ПРИМЕНЕНИЕ ПРАВКИ ИЗ ЧАТА
+   Событие отправляет чат только по нажатию «Применить». Здесь — единственное
+   место, где правка попадает в результат; исходное значение сохраняется.
+   ========================================================= */
+document.addEventListener('gt-apply-edit', (event) => {
+  const detail = event.detail || {};
+  if (!lastResult || !lastResult.data || !Array.isArray(lastResult.data.translations)) return;
+  const row = lastResult.data.translations.find((item) => item.lang === detail.lang);
+  if (!row) return;
+
+  row.previousOfficial = row.official || null;
+  if (detail.official) row.official = detail.official;
+  else if (Array.isArray(detail.alternatives) && detail.alternatives.length > 0) row.official = detail.alternatives[0];
+  if (Array.isArray(detail.alternatives) && detail.alternatives.length > 0) row.alternatives = detail.alternatives.slice(0, 5);
+  if (detail.explanation) row.explanation = detail.explanation;
+  if (detail.confidence) row.confidence = detail.confidence;
+  // Чат не подтверждает правку источником — бейдж «проверено» снимается.
+  row.verified = false;
+  row.evidence = null;
+  row.editedByChat = true;
+
+  renderResult(lastResult.data, { fromCache: lastResult.fromCache, timestamp: lastResult.timestamp });
+});
+
 initTheme();
 initLangChips();
 initModals();
