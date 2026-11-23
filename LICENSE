@@ -1,21 +1,81 @@
-MIT License
+GameTranslator — исходный код доступен для ознакомления
+Copyright (c) 2026 Sharky. Все права защищены.
 
-Copyright (c) 2026 Sharky
+======================================================================
+1. СТАТУС
+======================================================================
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Исключительные права на исходный код, документацию, тексты, графику и иные
+материалы этого репозитория (далее — «Материалы») принадлежат правообладателю.
+Репозиторий публикуется в открытом доступе исключительно в целях ознакомления
+с кодом. Настоящее уведомление является не лицензией, а заявлением о
+сохранении всех прав: никаких прав на использование Материалов оно не
+предоставляет.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+======================================================================
+2. РАЗРЕШАЕТСЯ
+======================================================================
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+- просматривать и изучать Материалы в этом репозитории;
+- создавать форки в пределах GitHub исключительно для просмотра и подготовки
+  предложений об изменениях (pull request) в этот репозиторий.
+
+======================================================================
+3. ЗАПРЕЩАЕТСЯ
+======================================================================
+
+Без предварительного письменного разрешения правообладателя запрещается:
+
+- использовать Материалы полностью или частично в любых продуктах, сервисах и
+  приложениях, включая внутреннее использование в организации;
+- копировать, изменять, переводить, распространять, публиковать,
+  сублицензировать или продавать Материалы и производные от них;
+- размещать Материалы или их производные в иных репозиториях, сервисах и
+  сборках;
+- удалять или изменять уведомления об авторских правах;
+- любое иное использование, прямо не перечисленное в разделе 2.
+
+Запрос разрешения — через контакты, указанные в README репозитория.
+
+======================================================================
+4. ТРЕТЬИ СТОРОНЫ
+======================================================================
+
+Библиотеки в каталоге assets/vendor/ (marked, DOMPurify и другие) включены на
+условиях их собственных лицензий (MIT и др.). Их уведомления об авторских
+правах сохраняются и не отменяются настоящим уведомлением.
+
+======================================================================
+5. ОТКАЗ ОТ ГАРАНТИЙ
+======================================================================
+
+Материалы предоставляются «как есть», без каких-либо гарантий, явных или
+подразумеваемых, включая гарантии пригодности для конкретной цели.
+Правообладатель не несёт ответственности за любые последствия использования
+Материалов.
+
+Толкование настоящего уведомления — по праву Российской Федерации.
+
+======================================================================
+ENGLISH
+======================================================================
+
+GameTranslator — source available, all rights reserved.
+Copyright (c) 2026 Sharky.
+
+The source code in this repository is published for viewing purposes only.
+No license is granted: reading and studying the code, and forking it on GitHub
+solely to propose changes (pull requests) back to this repository, are
+permitted. Any use, copying, modification, distribution, sublicensing,
+publication or sale of the materials, in whole or in part, requires the prior
+written permission of the copyright holder. Third-party libraries in
+assets/vendor/ remain under their own licenses (MIT and others). The materials
+are provided "AS IS", without warranty of any kind.
+
+======================================================================
+ИСТОРИЯ ЛИЦЕНЗИИ
+======================================================================
+
+Версии до v1.2.0 включительно публиковались под MIT License. Копии, полученные
+на тот момент, сохраняют права, предоставленные MIT. С текущей версии действует
+настоящее уведомление: все права защищены.
